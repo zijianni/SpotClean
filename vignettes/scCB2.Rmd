@@ -1,0 +1,171 @@
+---
+title: "CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data"
+authors: "Zijian Ni and Christina Kendziorski"
+package: scCB2
+date: 06/23/2020
+output: 
+    BiocStyle::html_document
+vignette: >
+    %\VignetteIndexEntry{CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}  
+---
+
+
+```{r, echo=FALSE, results="hide", message=FALSE}
+require(knitr)
+opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+
+# Introduction
+
+Droplet-based single-cell RNA sequencing (scRNA-seq) is a powerful and widely-used approach for profiling genome-wide gene expression 
+in individual cells. Current commercial droplet-based technologies such as 10X Genomics utilize gel beads, each containing 
+oligonucleotide indexes made up of bead-specific barcodes combined with unique molecular identifiers (UMIs) and oligo-dT tags 
+to prime polyadenylated RNA. Single cells of interest are combined with reagents in one channel of a microfluidic chip, 
+and gel beads in another, to form gel-beads in emulsion, or GEMs. Oligonucleotide indexes bind polyadenylated RNA within each GEM 
+reaction vesicle before gel beads are dissolved releasing the bound oligos into solution for reverse transcription. 
+By design, each resulting cDNA molecule contains a UMI and a GEM-specific barcode that, ideally,
+tags mRNA from an individual cell, but this is often not the case in practice.  To distinguish true cells from background barcodes in
+droplet-based single cell RNA-seq experiments, we introduce **CB2** and `scCB2`, its corresponding R package.
+
+**CB2** extends the EmptyDrops approach by introducing a clustering step that groups similar barcodes and 
+then conducts a statistical test to identify groups with expression distributions that vary from the background.
+While advantages are expected in many settings, users will benefit from 
+noting that **CB2** does not test for doublets or multiplets and, consequently, some of the high count identifications 
+may consist of two or more cells. Methods for identifying multiplets may prove useful after applying **CB2**. 
+It is also important to note that any method for distinguishing cells from background barcodes is technically correct in 
+identifying low-quality cells given that damaged cells exhibit expression profiles that differ from the background. 
+Specifically, mitochondrial gene expression is often high in damaged cells.
+Such cells are typically not of interest in downstream analysis and should therefore be removed. 
+The GetCellMat function in `scCB2` may be used toward this end.
+
+# Quick Start
+
+## Installation
+
+Install from Bioconductor:
+
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("scCB2")
+
+```
+
+## All-in-one function
+
+`QuickCB2` is an all-in-one function to apply CB2 on 10x Cell Ranger raw data and get a matrix of real cells identified by CB2 under default settings. By specifying `AsSeurat = TRUE`, a Seurat object is returned so that users can directly apply the Seurat pipeline for downstream analyses.
+
+Usage: 
+```{r, eval=FALSE}
+library(scCB2)
+
+# If raw data has three separate files within one directory
+# and you want to control FDR at the default 1%:
+RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory")
+
+# If raw data is in HDF5 format and 
+# you'd like a Seurat object under default FDR threshold:
+RealCell_S <-  QuickCB2(h5file = "/path/to/raw/data/HDF5", 
+                        AsSeurat = TRUE)
+```
+
+An example illustrating how it works and what the final output looks like can be found at the end of *Detailed Steps*.
+
+## Running Speed
+
+The computational speed is related to the size and structure of input datasets. As a reference, scCB2 running on a medium-size dataset (around 30,000 genes and 8,000 cells after cell calling) using 6 cores takes less than 10 minutes.
+
+## Saving a sparse matrix to 10x format
+
+For users who would like to save the CB2 output cell matrix to 10x format (e.g. "matrix.mtx", "barcodes.tsv" and "genes.tsv"), there are existing packages to help. For example in package `DropletUtils`:
+
+```{r, eval=FALSE}
+DropletUtils::write10xCounts(path = "/path/to/save/data",
+                             x = RealCell)
+```
+
+# Detailed Steps
+
+## Read count matrix from 10x output raw data
+
+Currently, the most widely-used droplet-based protocol is 10x Chromium. Our package provides functions to directly read 10x Cell Ranger output files and generate a feature-by-barcode count matrix that may be read into R. Public 10x datasets can be found [here](https://www.10xgenomics.com/resources/datasets). 
+
+Our package contains a small subset of 10x data, `mbrainSub`, corresponding to the first 50,000 barcodes of [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz).
+
+We first generate 10x output files of `mbrainSub`, then read it using our built-in functions.
+
+```{r}
+library(scCB2)
+library(SummarizedExperiment)
+
+data(mbrainSub)
+
+data.dir <- file.path(tempdir(),"CB2_example")
+DropletUtils::write10xCounts(data.dir,
+                             mbrainSub,
+                             version = "3")
+
+list.files(data.dir)
+```
+
+For Cell Ranger version <3, the raw data from 10x Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We now read these files back into R and compare with original data matrix.
+
+```{r}
+mbrainSub_2 <- Read10xRaw(data.dir)
+identical(mbrainSub, mbrainSub_2)
+```
+
+If raw data is not from the 10x Chromium pipeline, a user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of the count matrix can be either a sparse matrix or standard matrix.
+
+## Run **CB2** to distinguish real cells from empty droplets
+
+The main function `CB2FindCell` takes a raw count matrix as input and returns real cells, test statistics, and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total count less than or equal to 100 are background empty droplets (Default), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`.
+
+```{r}
+CBOut <- CB2FindCell(mbrainSub, Ncores = 2)
+str(assay(CBOut)) # cell matrix
+str(metadata(CBOut)) # test statistics, p-values, etc
+```
+
+## Extract real cell matrix
+
+If readers are not interested in the output testing information, `GetCellMat` can extract the real cell matrix directly from `CB2FindCell` output. It also provides a filtering option to remove broken cells based on the proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.25 (Default: 1, No filtering).
+
+```{r}
+RealCell <- GetCellMat(CBOut, MTfilter = 0.25)
+str(RealCell)
+```
+
+## Downstream analysis
+
+After `CB2` pre-processing, the real cell matrix is still in matrix format, so it can be directly used in downstream statistical analyses. For example, if we want to use the *Seurat* pipeline, we can easily create a Seurat object using
+
+```{r}
+SeuratObj <- Seurat::CreateSeuratObject(counts = RealCell, 
+                                        project = "mbrain_example")
+SeuratObj
+```
+
+## All-in-one function
+
+Under default parameters, we can directly use the all-in-one function `QuickCB2` to get the real cell matrix from 10x raw data. 
+
+```{r}
+RealCell_Quick <- QuickCB2(dir = data.dir, Ncores = 2)
+str(RealCell_Quick)
+```
+
+Now it's ready for downstream analysis such as normalization and clustering. Example Seurat tutorial: https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html
+
+# Session Information
+```{r}
+sessionInfo()
+```
+
+# Citation
+
+Ni, Z., Chen, S., Brown, J., & Kendziorski, C. (2020). CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data. Genome Biology, 21(1), 137. https://doi.org/10.1186/s13059-020-02054-8

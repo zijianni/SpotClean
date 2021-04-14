@@ -1,0 +1,52 @@
+Package: TBD
+Version: 0.99.0
+Date: 2021/4/14
+Title: CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data 
+Authors@R: c(
+    person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
+    person("Christina", "Kendziorski", role="ctb"))
+Depends: 
+    R (>= 3.6.0)
+Imports: 
+    SingleCellExperiment,
+    SummarizedExperiment,
+    Matrix,
+    methods,
+    utils,
+    stats,
+    edgeR,
+    rhdf5,
+    parallel,
+    DropletUtils,
+    doParallel,
+    iterators,
+    foreach,
+    Seurat
+Suggests: 
+    testthat (>= 2.1.0),
+    KernSmooth,
+    beachmat,
+    knitr,
+    BiocStyle,
+    rmarkdown
+biocViews:
+    DataImport,
+    RNASeq,
+    SingleCell,
+    Sequencing,
+    GeneExpression,
+    Transcriptomics,
+    Preprocessing,
+    Clustering
+Description: 
+    scCB2 is an R package implementing CB2 for distinguishing real cells from empty droplets in droplet-based single cell RNA-seq experiments (especially for 10x Chromium). 
+    It is based on clustering similar barcodes and calculating Monte-Carlo p-value for each cluster to test against background distribution. 
+    This cluster-level test outperforms single-barcode-level tests in dealing with low count barcodes and homogeneous sequencing library, while keeping FDR well controlled.
+License: GPL-3
+NeedsCompilation: yes
+VignetteBuilder: knitr
+Encoding: UTF-8
+SystemRequirements: C++11
+RoxygenNote: 7.1.1
+URL: https://github.com/zijianni/scCB2
+BugReports: https://github.com/zijianni/scCB2/issues
