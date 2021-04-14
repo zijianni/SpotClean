@@ -1,4 +1,4 @@
-# scCB2
+# TBD
 
 Droplet-based single cell RNA-seq technologies provide a novel insight in transcriptome profiles of individual cells with a much larger cell numbers and cheaper cost compared with microfluidic-based single cell RNA-seq. During library preparation, each cell is expected to be captured by one droplet. The number of droplets are usually much more than the number of cells, thus most droplets do not contain real cells. However, there are always free-floating RNA fragments in the library due to broken cells or library contamination. Empty droplets will capture them and have non-zero expression values after sequencing.
 
