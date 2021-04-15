@@ -15,38 +15,44 @@
 #' analysis pipeline
 #' https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/rkit.
 #'
-#' @param count_dir The directory of 10x output matrix data. The directory should include
+#' @param count_dir (chr) The directory of 10x output matrix data. The directory should include
 #' three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
 #'
-#' @param h5_file The path of 10x output matrix HDF5 file (ended with .h5).
+#' @param h5_file (chr) The path of 10x output matrix HDF5 file (ended with .h5).
 #'
-#' @param tissue_csv_file The path of 10x output CSV file of spot positions,
+#' @param tissue_csv_file (chr) The path of 10x output CSV file of spot positions,
 #' usually named \code{tissue_positions_list.csv}.
 #'
-#' @param tissue_img_file The path of the 10x output low resolution
+#' @param tissue_img_file (chr) The path of the 10x output low resolution
 #' tissue image in PNG format,
 #' usually named \code{tissue_lowres_image.png}. If \code{NULL},
-#' the returned slide data does not contain image information.
+#' the returned slide data does not contain image
+#' information. Please do provide this file if you could find it.
+#' Default: \code{NULL}.
 #'
-#' @param scale_factor_file The path of the 10x output scale factor file in json
-#' format, usually named \code{scalefactors_json.json}.If \code{NULL},
-#' spot positions in image will not be corrected by the scale factor.
+#' @param scale_factor_file (chr) The path of the 10x output scale factor
+#' file in json format, usually named \code{scalefactors_json.json}.
+#' If \code{NULL}, spot positions in image will
+#' not be corrected by the scale factor. Please do provide this file
+#' if you could find it. Default: \code{NULL}.
 #'
-#' @param row_name Specify either using gene symbols
+#' @param row_name (chr) Specify either using gene symbols
 #' (\code{row_name = "symbol"}) or gene Ensembl IDs (\code{row_name = "id"})
-#' as row names of the count matrix. Default is \code{row_name = "symbol"}.
+#' as row names of the count matrix.
+#' Default: \code{row_name = "symbol"}.
 #'
-#' @param meta Logical. If \code{TRUE}, \code{Read10xRaw} or \code{Read10xRawH5}
+#' @param meta (logical) If \code{TRUE}, \code{Read10xRaw} or \code{Read10xRawH5}
 #' returns a list containing both the
 #' count matrix and metadata of genes (features). Metadata includes feature
 #' names, IDs and other additional information depending on Space Ranger
-#' output. If \code{FALSE} (default), only returns the count matrix.
+#' output. If \code{FALSE}, only returns the count matrix.
+#' Default: \code{FALSE}.
 #'
 #' @return If \code{meta = TRUE}, \code{Read10xRaw()} or \code{Read10xRawH5()}
 #' returns a list of two elements: a
 #' "dgCMatrix" sparse matrix containing expression counts and a data
 #' frame containing metadata of genes (features). For the count matrix,
-#' each row is a gene (feature) and each column is a spot barcode.  If
+#' each row is a gene (feature) and each column is a spot barcode. If
 #' \code{meta = FALSE}, only returns the count matrix.
 #'
 #' \code{Read10xSlide()} returns a list of two objects. The first object, slide,

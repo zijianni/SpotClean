@@ -1,7 +1,8 @@
-#' @title Filter and return high expressed and high variability genes
+#' @title Read 10x Space Ranger output data
 #'
-#' @description This function is for filtering genes in the expression count
-#' matrix based on their average expression and variability.
+#' @description \code{Read10xRaw} is a one-line handy function for reading
+#' the raw expression data from 10x Space Ranger outputs and producing a count
+#' matrix as an R object.
 #'
 #' @param count_dir The directory of 10x output matrix data. The directory should include
 #' three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
@@ -16,3 +17,7 @@
 #'
 #'
 #' @export
+
+VisualizeCluster <- function(){
+
+}
