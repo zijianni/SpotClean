@@ -1,4 +1,4 @@
-#' @title Filter out low count genes and barcodes from count matrix
+#' @title Filter out low count genes and barcodes from count matrix (deprecated)
 #'
 #' @description This function is used for filtering out low count genes and barcodes
 #' from count matrix based on total gene expression counts (row sums) and
@@ -25,14 +25,14 @@
 #' @importFrom Matrix colSums
 #' @importFrom Matrix rowSums
 #'
-#' @export
-FilterGB <- function(count_mat,
-                    g_threshold = 0,
-                    b_threshold = 0) {
-    #filter barcodes and genes
-    bc <- colSums(count_mat)
-    count_mat <- count_mat[, bc > b_threshold]
-    gc <- rowSums(count_mat)
-    count_mat <- count_mat[gc > g_threshold, ]
-    return(count_mat)
-}
+
+# FilterGB <- function(count_mat,
+#                     g_threshold = 0,
+#                     b_threshold = 0) {
+#     #filter barcodes and genes
+#     bc <- colSums(count_mat)
+#     count_mat <- count_mat[, bc > b_threshold]
+#     gc <- rowSums(count_mat)
+#     count_mat <- count_mat[gc > g_threshold, ]
+#     return(count_mat)
+# }

@@ -50,7 +50,7 @@
 #' @import ggplot2
 #' @import viridis
 #' @import dplyr
-#' @importFrom SummarizedExperiment assays metadata
+#' @importFrom SummarizedExperiment assays assayNames metadata
 #'
 #' @export
 
@@ -61,6 +61,11 @@ VisualizeHeatmap <- function(slide_obj, value,
 
     # manipulate value to plot
     if(length(value)==1){
+
+        if(!assay_name%in%assayNames(slide_obj)){
+            stop("Specified assay name does not exist.")
+        }
+
         count_mat <- assays(slide_obj)[[assay_name]]
 
         if(!value%in%rownames(count_mat)){

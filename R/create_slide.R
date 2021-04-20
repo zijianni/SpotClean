@@ -11,6 +11,10 @@
 #'
 #' @param slide_info (list) The slide information from \code{Read10xSlide()}.
 #'
+#' @param gene_cutoff (num) Filter out genes with average expressions
+#' among all spots below this cutoff.
+#' Default: 0.1.
+#'
 #' @return A \code{SummarizedExperiment} object containing
 #' gene expression and spot metadata.
 #'
@@ -23,10 +27,11 @@
 
 
 #' @import SummarizedExperiment
+#' @import Matrix
 #'
 #' @export
 
-CreateSlide <- function(count_mat, slide_info){
+CreateSlide <- function(count_mat, slide_info, gene_cutoff=0.1){
 
     if(!identical(sort(colnames(count_mat)),
                  sort(slide_info$slide$barcode)
@@ -38,8 +43,11 @@ CreateSlide <- function(count_mat, slide_info){
     # rearrange barcodes
     count_mat <- count_mat[,slide_info$slide$barcode]
 
-    total_counts <- colSums(count_mat)
-    slide_info$slide$total_counts <- total_counts
+    # filter genes
+    good_gene <- rowMeans(count_mat)>=gene_cutoff
+    message("Filtered out ",sum(!good_gene)
+            ," genes with average expressions below ",gene_cutoff, ".")
+    count_mat <- count_mat[good_gene,]
 
     obj <- SummarizedExperiment(assays=list(raw=count_mat),
                                 metadata=slide_info)

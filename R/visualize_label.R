@@ -51,7 +51,7 @@ VisualizeLabel <- function(slide_obj, label="tissue",
     if(length(label)==1){
 
         if(!label%in%colnames(metadata(slide_obj)$slide)){
-            stop("Label does not exist in slide metadata.")
+            stop("Label name does not exist in slide metadata.")
         }
 
         label <- metadata(slide_obj)$slide[,label]
