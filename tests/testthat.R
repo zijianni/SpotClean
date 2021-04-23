@@ -1,4 +1,4 @@
 library(testthat)
-library(scCB2)
+library(TBD)
 
-test_check("scCB2")
+test_check("TBD")

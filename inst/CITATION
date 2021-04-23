@@ -1,12 +1,10 @@
 bibentry(
     bibtype = "Article",
-    title = "CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data",
+    title = "TBD",
     author = c(
         person("Zijian", "Ni"),
-        person("Shuyang", "Chen"),
-        person("Jared", "Brown"),
         person("Christina", "Kendziorski")),
-    journal = "Genome Biology",
-    year = "2020",
-    doi = "10.1186/s13059-020-02054-8"
+    journal = "xx",
+    year = "xx",
+    doi = "xx"
 )

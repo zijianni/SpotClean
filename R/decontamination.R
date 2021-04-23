@@ -1,18 +1,32 @@
 #' @title Decontaminate spot swapping effect in spatial transcriptomics data
 #'
-#' @description This is the main function for decontaminating spot swapping
-#' effect in spatial transcriptomics data.
+#' @description This is the main function implementing the TBD method
+#' for decontaminating spot swapping effect in spatial transcriptomics data.
 #'
-#' @param count_dir The directory of 10x output matrix data. The directory should include
-#' three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
+#' @param slide_obj A slide object created or inherited from
+#' \code{CreateSlide()}.
 #'
-#' @return If \code{meta = TRUE}, \code{Read10xRaw()} or \code{Read10xRawH5()}
+#' @param verbose (logical) Whether print progress information
+#' Default: \code{TRUE}
+#'
+#' @return A slide object where the decontaminated expression matrix is in the
+#' "decont" assay slot and the contamination statistics are in the "cont_stat"
+#' metadata slot.
+#'
+#' @details Briefly, the contamination level for the slide is estimated based on
+#' the total counts of all spots. UMI counts travelling around the slide are
+#' assumed to follow Poisson distributions and modeled by a mixture of
+#' Gaussian and uniform kernels and adjusted for the mRNA density in each spot.
+#' The underlying uncontaminated gene expressions are estimated by EM algorithm
+#' to maximize the data likelihood.
+#'
 #'
 #' @examples
 #'
-#' @importFrom utils read.delim
-#' @importFrom Matrix readMM
-#' @importFrom Matrix sparseMatrix
+#' data(MbrainSmall)
+#' mbrain_obj <- CreateSlide(mbrain_raw,
+#'                           mbrain_slide_info)
 #'
+#' @import Matrix
 #'
 #' @export

@@ -53,8 +53,9 @@ KeepHighGene <- function(count_mat, top_high=5000, mean_cutoff=1){
     #        Names of each entry are the corresponding gene names.
 
     mean_exp <- rowMeans(count_mat)
-    top_genes <- rank(-mean_exp)<=top_high # keep at most 2000 highly expressed genes.
-    count_mat <- count_mat[top_genes,]
+    # keep at most this number of highly expressed genes.
+    top_genes <- rank(-mean_exp)<=top_high
+    count_mat <- count_mat[top_genes,,drop=F]
     mean_exp <- mean_exp[top_genes]
 
     high_exp_genes <- mean_exp>=mean_cutoff
@@ -69,5 +70,5 @@ KeepHighGene <- function(count_mat, top_high=5000, mean_cutoff=1){
     message("Kept ",sum(gene_tokeep),
             " highly expressed or highly variable genes.")
 
-    return(count_mat[gene_tokeep,])
+    return(count_mat[gene_tokeep,, drop=F])
 }
