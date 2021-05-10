@@ -29,14 +29,14 @@
 #' class as \code{count_mat}.
 #'
 #' @examples
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' dim(mbrain_raw)
 #' mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100)
 #' dim(mbrain_raw_f)
 #'
-#' @import dplyr
 #' @importFrom Seurat CreateSeuratObject FindVariableFeatures
-#' @import Matrix
+#' @importFrom Matrix rowMeans
 #'
 #'
 #' @export
@@ -48,13 +48,14 @@ KeepHighGene <- function(count_mat, top_high=5000,
     mean_exp <- rowMeans(count_mat)
     # keep at most this number of highly expressed genes.
     top_genes <- rank(-mean_exp)<=top_high
-    count_mat <- count_mat[top_genes,,drop=F]
+    count_mat <- count_mat[top_genes,,drop=FALSE]
     mean_exp <- mean_exp[top_genes]
 
     high_exp_genes <- mean_exp>=mean_cutoff
 
-    S_vf <- CreateSeuratObject(log1p(count_mat)) %>%
-        FindVariableFeatures(selection.method = "mvp", verbose = FALSE)
+    S_vf <- CreateSeuratObject(log1p(count_mat))
+    S_vf <- FindVariableFeatures(S_vf,
+                                 selection.method = "mvp", verbose = FALSE)
 
     high_variable_genes <- S_vf@assays$RNA@meta.features$mvp.variable
 
@@ -65,5 +66,5 @@ KeepHighGene <- function(count_mat, top_high=5000,
                 " highly expressed or highly variable genes.")
     }
 
-    return(count_mat[gene_tokeep,, drop=F])
+    return(count_mat[gene_tokeep,, drop=FALSE])
 }

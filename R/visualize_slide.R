@@ -11,20 +11,24 @@
 #'
 #' @examples
 #'
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' gp <- VisualizeSlide(mbrain_obj)
 #' plot(gp)
 
 
-#' @import dplyr
 #' @import ggplot2
-#' @import tibble
+#' @importFrom tibble tibble
+#' @importFrom S4Vectors metadata
 #'
 #' @export
 
 VisualizeSlide <- function(slide_obj){
+
+    # junk code... get rid of R CMD check notes
+    imagerow <- imagecol <- NULL
 
     slide <- metadata(slide_obj)$slide
     grob <- metadata(slide_obj)$grob
@@ -59,7 +63,6 @@ VisualizeSlide <- function(slide_obj){
 }
 
 
-#' @importFrom ggplot2 ggname
 #' @import grid
 # This function is developed based on 10x's secondary analysis pipeline
 # https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/rkit.
@@ -84,7 +87,7 @@ VisualizeSlide <- function(slide_obj){
         draw_group = function(data, panel_scales, coord) {
             vp <- viewport(x=data$x, y=data$y)
             g <- editGrob(data$grob[[1]], vp=vp)
-            ggname(".geom_spatial", g)
+            .ggname(".geom_spatial", g)
         },
 
         required_aes = c("grob","x","y")
@@ -101,4 +104,13 @@ VisualizeSlide <- function(slide_obj){
         inherit.aes = inherit.aes,
         params = list(na.rm = na.rm, ...)
     )
+}
+
+
+# Name ggplot grid object, from ggplot2/R/utilities-grid.r
+# Convenience function to name grid objects
+
+.ggname <- function(prefix, grob) {
+    grob$name <- grobName(grob, prefix)
+    grob
 }

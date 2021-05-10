@@ -23,14 +23,16 @@
 #'
 #' @examples
 #'
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' mbrain_obj
 
 
-#' @import SummarizedExperiment
-#' @import Matrix
+#' @importFrom SummarizedExperiment SummarizedExperiment
+#' @importFrom Matrix rowMeans
+#'
 #'
 #' @export
 

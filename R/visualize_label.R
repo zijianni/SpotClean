@@ -29,7 +29,8 @@
 #'
 #' @examples
 #'
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' gp <- VisualizeLabel(mbrain_obj, label="tissue",
@@ -38,14 +39,17 @@
 
 
 #' @import ggplot2
-#' @import dplyr
-#' @importFrom SummarizedExperiment metadata
+#' @importFrom dplyr filter
+#' @importMethodsFrom S4Vectors metadata
 #'
 #' @export
 
 VisualizeLabel <- function(slide_obj, label="tissue",
                            subset_barcodes=NULL, title="",
                            legend_title="Label"){
+
+    # junk code... get rid of R CMD check notes
+    imagerow <- imagecol <- barcode <- NULL
 
     # manipulate label to plot
     if(length(label)==1){

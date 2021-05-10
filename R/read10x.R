@@ -64,7 +64,8 @@
 #' @examples
 #'
 #' # simulate 10x output files
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' data_dir <- file.path(tempdir(),"sim_example")
 #' dir.create(data_dir)
 #' matrix_dir <- file.path(data_dir,"matrix.mtx")
@@ -207,8 +208,9 @@ Read10xRawH5 <- function(h5_file,
 #' @rdname Read10x
 #' @importFrom utils read.csv
 #' @importFrom readbitmap read.bitmap
-#' @importFrom grid rasterGrob unit
+#' @import grid
 #' @importFrom rjson fromJSON
+#' @importFrom methods as
 #'
 #' @export
 

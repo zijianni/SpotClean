@@ -1,4 +1,6 @@
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
+
 mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
 
 mbrain_slide_info2 <- mbrain_slide_info
@@ -26,6 +28,6 @@ test_that("Subsetting barcodes", {
 })
 
 test_that("Object class", {
-    expect_identical(class(gp1),c("gg","ggplot"))
+    expect_s3_class(gp1,c("gg","ggplot"))
 
 })

@@ -1,8 +1,15 @@
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
+
+mbrain_filter <- KeepHighGene(mbrain_raw)
 
 test_that("Default parameters", {
-    expect_true(nrow(KeepHighGene(mbrain_raw))==100)
+    expect_true(nrow(mbrain_filter)==100)
 
+})
+
+test_that("Object class", {
+    expect_s4_class(mbrain_filter, "dgCMatrix")
 })
 
 test_that("Top high gene cutoff", {

@@ -34,7 +34,8 @@
 #'
 #' @examples
 #'
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' gp <- VisualizeHeatmap(mbrain_obj, "Bc1",
@@ -43,9 +44,10 @@
 
 
 #' @import ggplot2
-#' @import viridis
-#' @import dplyr
-#' @importFrom SummarizedExperiment assays assayNames metadata
+#' @importFrom viridis scale_fill_viridis
+#' @importFrom dplyr filter
+#' @importFrom SummarizedExperiment assay
+#' @importMethodsFrom S4Vectors metadata
 #'
 #' @export
 
@@ -53,6 +55,9 @@ VisualizeHeatmap <- function(slide_obj, value,
                              subset_barcodes=NULL,
                              logged=TRUE, legend_range=NULL,
                              title="", legend_title="Value"){
+
+    # junk code... get rid of R CMD check notes
+    imagerow <- imagecol <- barcode <- NULL
 
     # manipulate value to plot
     if(length(value)==1){
@@ -93,12 +98,12 @@ VisualizeHeatmap <- function(slide_obj, value,
     }
 
     # plot
-    gp <- ggplot(slide %>% filter(value>0), aes(x = imagecol, y = imagerow, fill = value)) +
+    gp <- ggplot(filter(slide,value>0), aes(x = imagecol, y = imagerow, fill = value)) +
         geom_point(
             shape = 21,
             colour = "white",
             size = 1.75) +
-        geom_point(data=slide %>% filter(value==0),
+        geom_point(data=filter(slide, value==0),
                shape = 21,
                colour = "white",
                fill="#d6d6d6",

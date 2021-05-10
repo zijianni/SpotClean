@@ -1,4 +1,5 @@
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
 
 test_that("Barcodes not matching", {
     expect_error(CreateSlide(mbrain_raw[,1:10], mbrain_slide_info),
@@ -13,7 +14,7 @@ test_that("Rearrange barcode order", {
 slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info, gene_cutoff = 100)
 
 test_that("Object class", {
-    expect_true(class(slide_obj)=="SummarizedExperiment")
+    expect_s4_class(slide_obj,"SummarizedExperiment")
 })
 
 test_that("Gene filtering", {

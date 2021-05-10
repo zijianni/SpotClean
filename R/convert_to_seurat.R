@@ -12,10 +12,6 @@
 #' should include files \code{tissue_lowres_iamge.png},
 #' \code{scalefactors_json.json} and \code{tissue_positions_list.csv}.
 #'
-#' @param assay_to_convert Name of the assay in the slide object to convert.
-#' Available assays can be found using \code{assayNames(<slide_obj>)}. In most
-#' cases you should convert the decontaminated data,
-#' which is the "decont" assay.
 #'
 #' @param slice Name for the stored image of the tissue slice.
 #' Default: "slice1".
@@ -25,7 +21,8 @@
 #' @examples
 #'
 #' \dontrun{
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' example_image_dir <- 'path/to/image/dir'
@@ -33,17 +30,16 @@
 #' str(seurat_obj)
 #' }
 #'
-#' @importFrom Seurat Read10X_Image Cells CreateSeuratObject DefaultAssay
-#'
+#' @importFrom Seurat Read10X_Image Cells CreateSeuratObject DefaultAssay<-
+#' @importFrom SummarizedExperiment assay
+#' @importFrom S4Vectors metadata
 #' @export
 
 ConvertToSeurat <- function(slide_obj, image_dir,
-                            assay_to_convert, slice="slice1"){
+                            slice="slice1"){
 
-    if(!assay_to_convert%in%assayNames(slide_obj)){
-        stop("Specified assay not found in the slide object.")
-    }
-    object <- CreateSeuratObject(assays(slide_obj)[[assay_to_convert]],
+
+    object <- CreateSeuratObject(assay(slide_obj),
                                  assay = "Spatial")
 
     filter_matrix <- ncol(object)!=nrow(metadata(slide_obj)$slide)

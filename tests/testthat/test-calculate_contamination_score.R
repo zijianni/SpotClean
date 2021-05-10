@@ -1,4 +1,5 @@
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
 
 mbrain_raw <- mbrain_raw[,mbrain_slide_info$slide$barcode]
 background_index <- which(mbrain_slide_info$slide$tissue==0)

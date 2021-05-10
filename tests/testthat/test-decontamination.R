@@ -1,39 +1,57 @@
-# Simulate 10x output files
+data(mbrain_raw)
+data(mbrain_slide_info)
 
-data(MbrainSmall)
+mbrain_obj <- CreateSlide(mbrain_raw,
+                          mbrain_slide_info)
 
-data_dir <- file.path(tempdir(),"sim_example")
-dir.create(data_dir)
-matrix_dir <- file.path(data_dir,"matrix.mtx")
-barcode_dir <- gzfile(file.path(data_dir, "barcodes.tsv.gz"), open="wb")
-gene_dir <- gzfile(file.path(data_dir, "features.tsv.gz"), open="wb")
+# test output
 
-# For simplicity, use gene names to generate gene IDs to fit the format.
-gene_name <- rownames(mbrain_raw)
-gene_id <- paste0("ENSG_fake_",gene_name)
-barcode_id <- colnames(mbrain_raw)
+test_that("Decontamination",{
+    expect_silent(mbrain_decont_obj <- TBD(mbrain_obj, candidate_radius=20,
+                                           maxit = 3, verbose = FALSE))
+    expect_s4_class(mbrain_decont_obj,"SummarizedExperiment")
+    expect_identical(names(mbrain_decont_obj@assays),"decont")
+    expect_equal(metadata(mbrain_decont_obj)$ARC_score, 0.05160659)
+    expect_equal(metadata(mbrain_decont_obj)$bleeding_rate, 0.2471155,
+                 tolerance = 4e-8)
+    expect_equal(metadata(mbrain_decont_obj)$global_contamination_rate, 0.3318779,
+                 tolerance = 4e-8)
+    expect_equal(metadata(mbrain_decont_obj)$global_contamination_rate, 0.3318779,
+                 tolerance = 4e-8)
+    expect_equal(metadata(mbrain_decont_obj)$weight_matrix[1,1], 3.87e-05,
+                 tolerance = 4e-8)
+    expect_equal(metadata(mbrain_decont_obj)$loglh,
+                 c(167010460, 167198067, 167231862))
 
-Matrix::writeMM(mbrain_raw,file = matrix_dir)
-write(barcode_id,file = barcode_dir)
-write.table(cbind(gene_id,gene_name,"type"),file = gene_dir,
-    sep = "\t", quote = FALSE, col.names = FALSE, row.names = FALSE)
-R.utils::gzip(matrix_dir)
-close(barcode_dir)
-close(gene_dir)
+    expect_equal(rowSums(assay(mbrain_decont_obj)),rowSums(assay(mbrain_obj)))
+    expect_equal(assay(mbrain_decont_obj)[1,1],2470.279366)
 
-# test reading function
-
-test_that("Directory/files existence", {
-    expect_error(Read10xRaw(paste0(data_dir,"/foo")),
-                 "Directory does not exist")
-    expect_error(Read10xRaw(tempdir()), "No 10x output file detected")
 })
 
+
+# test internal computations
+
+test_that("Internal computations", {
+    small_mat <- matrix(1:4,2,2)
+    small_edist <- .calculate_euclidean_weight(small_mat)
+    small_gdist <- .gaussian_kernel(small_edist,10)
+
+    expect_equal(small_edist[1,2],sqrt(2))
+    expect_equal(small_edist,t(small_edist))
+    expect_equal(small_gdist[1,2],0.9900498,tolerance = 4e-8)
+    expect_equal(.points_to_sdv(10,5), 25)
+
+})
+
+# test input parameters
 test_that("Data loading", {
-    expect_identical(Read10xRaw(data_dir), mbrain_raw)
+    expect_error(TBD(mbrain_obj, gene_keep = "foo"),
+                 "Specified genes not found")
 })
 
+names(mbrain_obj@assays) <- "decont"
 
-test_that("Metadata loading", {
-    expect_true(is.list(Read10xRaw(data_dir, meta = TRUE)))
+test_that("Wrong assay", {
+    expect_error(TBD(mbrain_obj, gene_keep = "foo"),
+                 "Cannot find raw data")
 })

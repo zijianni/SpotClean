@@ -6,7 +6,7 @@
 #' @param slide_obj A slide object created or inherited from
 #' \code{CreateSlide()}.
 #'
-#' @param gene_keep (vectof of chr) Gene names to keep for decontamination.
+#' @param gene_keep (vector of chr) Gene names to keep for decontamination.
 #' We recommend not decontaminating lowly expressed and lowly variable genes
 #' in order to save computation time. Even if user include them, their
 #' decontaminated expressions will not change too much from raw expressions.
@@ -48,7 +48,8 @@
 #'
 #' @examples
 #'
-#' data(MbrainSmall)
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' mbrain_decont_obj <- TBD(mbrain_obj, candidate_radius=20)
@@ -58,16 +59,18 @@
 
 
 #' @import Matrix
-#' @import stats
-#' @import SummarizedExperiment
-#' @importFrom utils txtProgressBar
-#' @importFrom dplyr filter
+#' @importFrom SummarizedExperiment assays SummarizedExperiment
+#' @importMethodsFrom S4Vectors metadata
+#' @importFrom utils txtProgressBar setTxtProgressBar
+#' @importFrom dplyr filter select
+#' @importFrom stats dist quantile optim cor lm coef
+#' @importFrom methods as
 #'
 #' @export
 
 TBD <- function(slide_obj, gene_keep=NULL,
                 maxit=30, tol=1,
-                candidate_radius=5*1:6,
+                candidate_radius=5*seq_len(6),
                 verbose=TRUE){
 
     if(verbose){
@@ -80,6 +83,9 @@ TBD <- function(slide_obj, gene_keep=NULL,
 
     # some universal variables
     raw_data <- assays(slide_obj)$raw  # raw data matrix
+    if(is.null(raw_data)){
+        stop("Cannot find raw data in input slide object.")
+    }
     slide <- metadata(slide_obj)$slide  # slide info
     n_spots <- ncol(raw_data)  # number of spots
     ts_idx <- which(slide$tissue==1)  # tissue index
@@ -95,6 +101,9 @@ TBD <- function(slide_obj, gene_keep=NULL,
     I1_y <- matrix(1,n_spots,length(ts_idx))
     I1_yy <- matrix(1,length(ts_idx),length(ts_idx))
     I_yy <- diag(length(ts_idx))
+
+    # junk code... get rid of R CMD check notes
+    imagerow <- imagecol <- tissue <- NULL
 
     # calculate ARC score
     ARC_score <- ARCScore(raw_data, which(slide$tissue==0))
@@ -158,15 +167,18 @@ TBD <- function(slide_obj, gene_keep=NULL,
     gc()
 
     # Find the best solution
-    best_radius <- which.min(lapply(cont_out,function(x) x$value) %>% unlist)
+    best_radius <- which.min(unlist(lapply(cont_out,function(x) x$value)))
     cont_rate <- cont_out[[best_radius]]$par[1]
     global_rate <- cont_out[[best_radius]]$par[2]
     cont_radius <- candidate_radius[best_radius]
 
     # contamination weight matrix
-    slide_weight <- .gaussian_kernel(slide_distance, .points_to_sdv(cont_radius, spot_distance))
+    slide_weight <- .gaussian_kernel(slide_distance,
+                                     .points_to_sdv(cont_radius, spot_distance))
     slide_weight <- slide_weight[ts_idx,]/rowSums(slide_weight[ts_idx,])
-    bleed_weight_mat <- cont_rate*(global_rate/n_spots+(1-global_rate)*slide_weight)
+    bleed_weight_mat <- cont_rate*(
+        global_rate/n_spots+(1-global_rate)*slide_weight
+    )
 
     #############################
     # Step 2: Decontaminate expression matrix
@@ -176,7 +188,8 @@ TBD <- function(slide_obj, gene_keep=NULL,
         message("\n",Sys.time()," Decontaminating genes ...")
     }
 
-    scale_factor <- rowSums(raw_data[gene_keep,])/rowSums(raw_ts_data[gene_keep,])
+    scale_factor <- rowSums(raw_data[gene_keep,])/
+        rowSums(raw_ts_data[gene_keep,])
     decont_data_init <- raw_ts_data[gene_keep,]*scale_factor
 
     decont_out <- .decont_EM(raw_data=raw_data[gene_keep,],
@@ -199,11 +212,11 @@ TBD <- function(slide_obj, gene_keep=NULL,
     gene_notkeep <- setdiff(rownames(raw_data),gene_keep)
     if(length(gene_notkeep)>0){
 
-        scale_ratio <- rowSums(raw_data[gene_notkeep,, drop=F])/
-            rowSums(raw_ts_data[gene_notkeep,, drop=F])
+        scale_ratio <- rowSums(raw_data[gene_notkeep,, drop=FALSE])/
+            rowSums(raw_ts_data[gene_notkeep,, drop=FALSE])
         scale_ratio[is.na(scale_ratio)] <- 1 # 0/0=NaN
         decont_data <- rbind(decont_data,
-                             raw_ts_data[gene_notkeep,, drop=F]*scale_ratio)
+                             raw_ts_data[gene_notkeep,, drop=FALSE]*scale_ratio)
     }
 
     decont_data <- as(decont_data[rownames(raw_data),],"dgCMatrix")
@@ -220,7 +233,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
     meta$slide <- filter(meta$slide, tissue==1)
     decont_obj <- CreateSlide(decont_data, meta,
                               gene_cutoff = 0, verbose=FALSE)
-    assayNames(decont_obj) <- "decont"
+    names(decont_obj@assays) <- "decont"
 
     if(verbose){
         message(Sys.time(), " All finished.")
@@ -304,7 +317,9 @@ TBD <- function(slide_obj, gene_keep=NULL,
     N_gene <- nrow(raw_data)
     N_spot <- ncol(raw_data)
     N_ts_spot <- length(ts_idx)
-    bleed_weight_mat <- cont_rate*(global_rate/N_spot+(1-global_rate)*slide_weight)
+    bleed_weight_mat <- cont_rate*(
+        global_rate/N_spot+(1-global_rate)*slide_weight
+    )
 
     # Iteration
     repeat{
@@ -328,7 +343,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
         # M-step
 
         decont_data_new <- S+M+N
-        loglh <- sum(raw_data*log(Eta)-Eta, na.rm = T)
+        loglh <- sum(raw_data*log(Eta)-Eta, na.rm = TRUE)
 
         # Difference between two adjacent iterations
         Lambda_maxdiff <- max(abs(decont_data_new-decont_data))
@@ -338,7 +353,8 @@ TBD <- function(slide_obj, gene_keep=NULL,
 
         if(verbose){
             message("Log-likelihood: ",round(loglh,3),
-                    "\nMax difference of decontaminated expressions: ",round(Lambda_maxdiff,3))
+                    "\nMax difference of decontaminated expressions: ",
+                    round(Lambda_maxdiff,3))
         }
 
         if(n_it>1){
@@ -398,7 +414,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
     mu_init <- obs_exp[ts_idx][nonzero_pos]
     mu_init <- mu_init/sum(mu_init)*sum(obs_exp)
     x_init <- unname(c(cont_rate_init,global_rate_init,mu_init))
-    x_init[1:2] <- pmax(x_init[1:2], 0.1)
+    x_init[c(1,2)] <- pmax(x_init[c(1,2)], 0.1)
 
     # calculate other matrices
     I1tZ <- crossprod(I1_y,obs_exp)
@@ -406,9 +422,9 @@ TBD <- function(slide_obj, gene_keep=NULL,
 
     # assign parameter bounds
     lower_bounds <- rep(0,length(x_init))
-    lower_bounds[1:2] <- c(sum(obs_exp[bg_idx])/sum(obs_exp),0.1)
+    lower_bounds[c(1,2)] <- c(sum(obs_exp[bg_idx])/sum(obs_exp),0.1)
     upper_bounds <- rep(Inf,length(x_init))
-    upper_bounds[1:2] <- 1
+    upper_bounds[c(1,2)] <- 1
 
     # minimize RSS using L-BFGS-B
     opt <- optim(x_init, .fn_optim, .gr_optim, method = "L-BFGS-B",
@@ -421,8 +437,8 @@ TBD <- function(slide_obj, gene_keep=NULL,
                  control = list(maxit=100))
 
     x_final <- numeric(length(ts_idx))
-    x_final[nonzero_pos] <- opt$par[-(1:2)]
-    opt$par <- c(opt$par[1:2],x_final)
+    x_final[nonzero_pos] <- opt$par[-c(1,2)]
+    opt$par <- c(opt$par[c(1,2)],x_final)
 
     return(list(opt))
 }
@@ -432,7 +448,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
                        W_yy, WtW, I_yy, Wyy_tWyy, I1_yy, n_spots, WtZ, I1tZ){
     # objective function: residual sum of squares
 
-    x_coef <- x[-(1:2)]
+    x_coef <- x[-c(1,2)]
     x_c_rate <- x[1] # cont_rate
     x_g_rate <- x[2] # global_rate
 
@@ -442,8 +458,10 @@ TBD <- function(slide_obj, gene_keep=NULL,
                   Wyy_tWyy[nonzero_pos,nonzero_pos],
                   I1_yy[nonzero_pos,nonzero_pos],
                   n_spots)%*%x_coef-
-        2*crossprod(.AtZ(x_c_rate, x_g_rate, WtZ[nonzero_pos], I1tZ[nonzero_pos],
-                         obs_exp[ts_idx[nonzero_pos]],n_spots),x_coef)
+        2*crossprod(.AtZ(x_c_rate, x_g_rate,
+                         WtZ[nonzero_pos], I1tZ[nonzero_pos],
+                         obs_exp[ts_idx[nonzero_pos]],n_spots),
+                    x_coef)
 
 
 }
@@ -456,21 +474,23 @@ TBD <- function(slide_obj, gene_keep=NULL,
     # recover full dimension of x
     N <- length(ts_idx)
     x_coef <- numeric(N)
-    x_coef[nonzero_pos] <- x[-(1:2)]
+    x_coef[nonzero_pos] <- x[-c(1,2)]
     x_c_rate <- x[1] # cont_rate
     x_g_rate <- x[2] # global_rate
 
 
-    x_coef1 <- x[-(1:2)]
+    x_coef1 <- x[-c(1,2)]
     x_c_rate <- x[1] # cont_rate
     x_g_rate <- x[2] # global_rate
 
 
     # gradient of spots expressions
-    g_coef <- 2*crossprod(.AtA(x_c_rate, x_g_rate, WtW[nonzero_pos,nonzero_pos],
+    g_coef <- 2*crossprod(.AtA(x_c_rate, x_g_rate,
+                               WtW[nonzero_pos,nonzero_pos],
                                I_yy[nonzero_pos,nonzero_pos],
                                Wyy_tWyy[nonzero_pos,nonzero_pos],
-                               I1_yy[nonzero_pos,nonzero_pos], n_spots),x_coef1)-
+                               I1_yy[nonzero_pos,nonzero_pos],
+                               n_spots),x_coef1)-
         2*.AtZ(x_c_rate, x_g_rate, WtZ[nonzero_pos], I1tZ[nonzero_pos],
                obs_exp[ts_idx[nonzero_pos]], n_spots)
 
@@ -510,10 +530,12 @@ TBD <- function(slide_obj, gene_keep=NULL,
 }
 
 .AtZ <- function(cont_rate, global_rate, WtZ, I1tZ, obs_ts_exp, n_spots){
-    (1-cont_rate)*obs_ts_exp+cont_rate*(1-global_rate)*WtZ+cont_rate*global_rate/n_spots*I1tZ
+    (1-cont_rate)*obs_ts_exp+cont_rate*(1-global_rate)*WtZ+
+        cont_rate*global_rate/n_spots*I1tZ
 }
 
-.dAtA_dr <- function(cont_rate, global_rate, WtW, I_yy, Wyy_tWyy,I1_yy, n_spots){
+.dAtA_dr <- function(cont_rate, global_rate,
+                     WtW, I_yy, Wyy_tWyy,I1_yy, n_spots){
     2*(cont_rate-1)*I_yy+2*cont_rate*(1-global_rate)^2*WtW+
         (1-2*cont_rate)*(1-global_rate)*Wyy_tWyy+
         2*(global_rate-cont_rate*global_rate^2)/n_spots*I1_yy

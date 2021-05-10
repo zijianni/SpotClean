@@ -1,31 +1,34 @@
 Package: TBD
 Version: 0.99.0
-Date: 2021/4/14
+Date: 2021/5/10
 Title: Decontaminate spot swapping in spatial transcriptomics data
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
     person("Christina", "Kendziorski", role="ctb"))
 Depends: 
-    R (>= 4.0.0)
+    R (>= 4.0.0),
 Imports: 
-    SingleCellExperiment,
-    SummarizedExperiment,
-    Matrix,
+    stats,
     methods,
     utils,
-    stats,
-    edgeR,
+    dplyr,
+    S4Vectors,
+    SummarizedExperiment,
+    Matrix,
     rhdf5,
-    parallel,
-    doParallel,
-    iterators,
-    foreach,
+    ggplot2,
+    grid,
+    readbitmap,
+    rjson,
+    tibble,
+    viridis,
     Seurat
 Suggests: 
     testthat (>= 2.1.0),
     knitr,
     BiocStyle,
-    rmarkdown
+    rmarkdown,
+    R.utils
 biocViews:
     DataImport,
     RNASeq,
@@ -34,12 +37,13 @@ biocViews:
     Transcriptomics,
     Preprocessing
 Description: 
-    xxx
+    Malformed Description field: should contain one or more complete sentences.
 License: GPL-3
 NeedsCompilation: yes
 VignetteBuilder: knitr
 Encoding: UTF-8
 SystemRequirements: C++11
-RoxygenNote: 7.1.1 xx
+RoxygenNote: 7.1.1
+LazyData: true
 URL: https://github.com/zijianni/xx
 BugReports: https://github.com/zijianni/xx/issues

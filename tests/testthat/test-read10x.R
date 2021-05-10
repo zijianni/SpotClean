@@ -1,9 +1,15 @@
 # Simulate 10x output files
 
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
 
 data_dir <- file.path(tempdir(),"sim_example")
-dir.create(data_dir)
+if(dir.exists(data_dir)){
+    file.remove(list.files(data_dir,full.names = TRUE))
+}else{
+    dir.create(data_dir)
+}
+
 matrix_dir <- file.path(data_dir,"matrix.mtx")
 barcode_dir <- gzfile(file.path(data_dir, "barcodes.tsv.gz"), open="wb")
 gene_dir <- gzfile(file.path(data_dir, "features.tsv.gz"), open="wb")

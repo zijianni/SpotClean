@@ -1,4 +1,5 @@
-data(MbrainSmall)
+data(mbrain_raw)
+data(mbrain_slide_info)
 
 test_that("Data dimension",{
     expect_equal(dim(mbrain_raw),c(100,4992))
