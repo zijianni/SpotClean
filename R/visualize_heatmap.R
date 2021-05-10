@@ -19,11 +19,6 @@
 #' when only plotting tissue spots or specific tissue types or regions.
 #' Default: \code{NULL}.
 #'
-#' @param assay_name (chr) When plotting gene expressions, specify the assay
-#' to use in the slide object. Available assay names can be found using \
-#' \code{assayNames(<slide_obj>)}.
-#' Default: \code{"raw"}.
-#'
 #' @param logged (logical) Specify if the color scale is log1p transformed.
 #' Default: \code{TRUE}.
 #'
@@ -55,18 +50,14 @@
 #' @export
 
 VisualizeHeatmap <- function(slide_obj, value,
-                             subset_barcodes=NULL, assay_name="raw",
+                             subset_barcodes=NULL,
                              logged=TRUE, legend_range=NULL,
                              title="", legend_title="Value"){
 
     # manipulate value to plot
     if(length(value)==1){
 
-        if(!assay_name%in%assayNames(slide_obj)){
-            stop("Specified assay name does not exist.")
-        }
-
-        count_mat <- assays(slide_obj)[[assay_name]]
+        count_mat <- assay(slide_obj)
 
         if(!value%in%rownames(count_mat)){
             stop("Specified gene does not exist in the expression matrix.")
@@ -92,7 +83,7 @@ VisualizeHeatmap <- function(slide_obj, value,
 
     # setup legend breaks
     if(is.null(legend_range)){
-        legend_range <- range(slide$value)
+        legend_range <- c(0,max(slide$value))
     }
     if(logged){
         legend_breaks <- floor(expm1( log1p(min(legend_range))+

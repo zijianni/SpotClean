@@ -22,6 +22,9 @@
 #' @param mean_cutoff (num) Genes with average expressions among all
 #' spots exceeding this cutoff are kept as highly expressed genes.
 #'
+#' @param verbose (logical) Whether print progress information.
+#' Default: \code{TRUE}
+#'
 #' @return A filtered expression count matrix with the same
 #' class as \code{count_mat}.
 #'
@@ -39,18 +42,8 @@
 #' @export
 
 
-KeepHighGene <- function(count_mat, top_high=5000, mean_cutoff=1){
-    # Keep highly expressed and highly variable genes.
-    # When calling high variable genes, input data will be log transformed.
-    # Args:
-    #   count_mat (matrix-like): gene expression data matrix
-    #   top_high (int): Only look for highly expressed genes within these top expressed genes.
-    #   mean_cutoff (num): mean expression cutoff. Genes reach this cutoff will be kept.
-    #   max_cutoff (num): max expression (among all spots) cutoff. Genes reach this cutoff will be kept.
-    #   top_variable (int): Only look for highly variable genes within these top variable genes.
-    # Returns:
-    #   (named vector of int): indexes of resulting genes in input data.
-    #        Names of each entry are the corresponding gene names.
+KeepHighGene <- function(count_mat, top_high=5000,
+                         mean_cutoff=1, verbose=TRUE){
 
     mean_exp <- rowMeans(count_mat)
     # keep at most this number of highly expressed genes.
@@ -67,8 +60,10 @@ KeepHighGene <- function(count_mat, top_high=5000, mean_cutoff=1){
 
     gene_tokeep <- high_variable_genes | high_exp_genes
 
-    message("Kept ",sum(gene_tokeep),
-            " highly expressed or highly variable genes.")
+    if(verbose){
+        message("Kept ",sum(gene_tokeep),
+                " highly expressed or highly variable genes.")
+    }
 
     return(count_mat[gene_tokeep,, drop=F])
 }
