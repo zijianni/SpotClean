@@ -47,7 +47,8 @@ VisualizeLabel <- function(object, ...) {
 #'
 #' @param title (chr) Title of the plot. Default: \code{""}.
 #'
-#' @param legend_title (chr) Title of the legend. Default: \code{"Label"}.
+#' @param legend_title (chr) Title of the legend. Under default,
+#' use \code{label} as legend title. Default: \code{NULL}.
 #'
 #' @import ggplot2
 #' @importFrom dplyr filter
@@ -61,7 +62,7 @@ VisualizeLabel <- function(object, ...) {
 
 VisualizeLabel.default <- function(object, label="tissue",
                            subset_barcodes=NULL, title="",
-                           legend_title="Label", ...){
+                           legend_title=NULL, ...){
 
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- barcode <- NULL
@@ -77,7 +78,9 @@ VisualizeLabel.default <- function(object, label="tissue",
         if(!label%in%colnames(object)){
             stop("Label name does not exist in slide metadata.")
         }
-        legend_title <- label
+        if(is.null(legend_title)){
+            legend_title <- label
+        }
         label <- object[,label]
 
     }else if(length(label)==nrow(object)){
@@ -125,7 +128,7 @@ VisualizeLabel.default <- function(object, label="tissue",
 #'
 VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
                                                 subset_barcodes=NULL, title="",
-                                                legend_title="Label", ...){
+                                                legend_title=NULL, ...){
 
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- barcode <- NULL
@@ -136,7 +139,9 @@ VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
         if(!label%in%colnames(metadata(object)$slide)){
             stop("Label name does not exist in slide metadata.")
         }
-        legend_title <- label
+        if(is.null(legend_title)){
+            legend_title <- label
+        }
         label <- metadata(object)$slide[,label]
 
     }else if(length(label)==ncol(object)){

@@ -52,16 +52,19 @@ VisualizeHeatmap <- function(object, ...) {
 #' @param logged (logical) Specify if the color scale is log1p transformed.
 #' Default: \code{TRUE}.
 #'
+#' @param viridis (logical) If true, color scale uses viridis.
+#' Otherwise, use rainbow. Default: \code{TRUE}.
+#'
 #' @param legend_range (length 2 vector of num) Custom legend range of the value.
 #' By default uses the range of the plotted values.
 #' Default: \code{NULL}.
 #'
 #' @param title (chr) Title of the plot. Default: \code{""}.
 #'
-#' @param legend_title (chr) Title of the legend. Default: \code{"Value"}.
+#' @param legend_title (chr) Title of the legend. Under default,
+#' use \code{value} as legend title. Default: \code{NULL}.
 #'
 #' @import ggplot2
-#' @importFrom viridis scale_fill_viridis
 #' @importFrom dplyr filter
 #' @importFrom SummarizedExperiment assay
 #' @importMethodsFrom S4Vectors metadata
@@ -74,8 +77,9 @@ VisualizeHeatmap <- function(object, ...) {
 
 VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
                              subset_barcodes=NULL,
-                             logged=TRUE, legend_range=NULL,
-                             title="", legend_title="Value",
+                             logged=TRUE, viridis=TRUE,
+                             legend_range=NULL,
+                             title="", legend_title=NULL,
                              ...){
 
     # junk code... get rid of R CMD check notes
@@ -89,30 +93,38 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 
     # manipulate value to plot
     if(length(value)==1 & is.character(value)){
-
-        if(is.null(exp_matrix)){
-            stop("You must provide an input expression matrix to plot ",
-                 value," expressions.")
-        }
-        if(!value%in%rownames(exp_matrix)){
-            stop("Specified gene does not exist in the expression matrix.")
+        if(is.null(legend_title)){
+            legend_title <- value
         }
 
-        legend_title <- value
+        # value to plot is in slide dataframe
+        if(value%in%colnames(slide)){
+            slide$value <- slide[,value]
+        }else{
+            # value to plot is in given matrix
+            if(is.null(exp_matrix)){
+                stop("You must provide an input expression matrix to plot ",
+                     value," expressions.")
+            }
+            if(!value%in%rownames(exp_matrix)){
+                stop("Specified gene does not exist in the expression matrix.")
+            }
 
-        # if expression matrix does not match slide info
-        shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
-        if(length(shared_bcs)==0){
-            stop("Barcodes in input matrix do not match any barcodes in slide.")
+            # if expression matrix does not match slide info
+            shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
+            if(length(shared_bcs)==0){
+                stop("Barcodes in input matrix do not ",
+                     "match any barcodes in slide.")
+            }
+            missed_bcs <- setdiff(slide$barcode,shared_bcs)
+
+            value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
+            names(value) <- c(shared_bcs, missed_bcs)
+            slide$value <- value[slide$barcode]
         }
-        missed_bcs <- setdiff(slide$barcode,shared_bcs)
-
-        value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
-        names(value) <- c(shared_bcs, missed_bcs)
-        slide$value <- value[slide$barcode]
 
     }else if(length(value)==nrow(object)){
-
+        # values to plot is directly given
         slide$value <- as.numeric(value)
 
     }else{
@@ -149,8 +161,9 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
                alpha=0.3
         ) +
         coord_cartesian(expand = FALSE) +
-        scale_fill_viridis(trans = ifelse(logged,"log1p","identity"),
-                           breaks=legend_breaks, limits=legend_range) +
+        .scale_fill_fun(viridis=viridis,
+                       trans = ifelse(logged,"log1p","identity"),
+                       breaks=legend_breaks, limits=legend_range) +
         xlim(0, max(slide$width)) +
         ylim(max(slide$height), 0) +
         xlab("") +
@@ -177,8 +190,9 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 #'
 VisualizeHeatmap.SummarizedExperiment <- function(object, value,
                                      subset_barcodes=NULL,
-                                     logged=TRUE, legend_range=NULL,
-                                     title="", legend_title="Value",
+                                     logged=TRUE, viridis=TRUE,
+                                     legend_range=NULL,
+                                     title="", legend_title=NULL,
                                      ...){
 
     # junk code... get rid of R CMD check notes
@@ -187,25 +201,34 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
     slide <- metadata(object)$slide
 
     # manipulate value to plot
-    if(length(value)==1){
+    if(length(value)==1 & is.character(value)){
 
         exp_matrix <- assay(object)
-
-        if(!value%in%rownames(exp_matrix)){
-            stop("Specified gene does not exist in the expression matrix.")
+        if(is.null(legend_title)){
+            legend_title <- value
         }
-        legend_title <- value
 
-        # if expression matrix does not match slide info
-        shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
-        if(length(shared_bcs)==0){
-            stop("Barcodes in input matrix do not match any barcodes in slide.")
+        # value to plot is in slide dataframe
+        if(value%in%colnames(slide)){
+            slide$value <- slide[,value]
+        }else{
+            # value to plot is in given matrix
+            if(!value%in%rownames(exp_matrix)){
+                stop("Specified gene does not exist in the expression matrix.")
+            }
+
+            # if expression matrix does not match slide info
+            shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
+            if(length(shared_bcs)==0){
+                stop("Barcodes in input matrix do not ",
+                     "match any barcodes in slide.")
+            }
+            missed_bcs <- setdiff(slide$barcode,shared_bcs)
+
+            value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
+            names(value) <- c(shared_bcs, missed_bcs)
+            slide$value <- value[slide$barcode]
         }
-        missed_bcs <- setdiff(slide$barcode,shared_bcs)
-
-        value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
-        names(value) <- c(shared_bcs, missed_bcs)
-        slide$value <- value[slide$barcode]
 
     }else if(length(value)==ncol(object)){
 
@@ -245,8 +268,9 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
                    alpha=0.3
         ) +
         coord_cartesian(expand = FALSE) +
-        scale_fill_viridis(trans = ifelse(logged,"log1p","identity"),
-                           breaks=legend_breaks, limits=legend_range) +
+        .scale_fill_fun(viridis=viridis,
+                       trans = ifelse(logged,"log1p","identity"),
+                       breaks=legend_breaks, limits=legend_range) +
         xlim(0, max(slide$width)) +
         ylim(max(slide$height), 0) +
         xlab("") +
@@ -264,4 +288,20 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
         )
 
     return(gp)
+}
+
+# Color scales: viridis v.s. rainbow
+#' @importFrom viridis scale_fill_viridis
+#' @importFrom grDevices colorRampPalette
+#' @importFrom RColorBrewer brewer.pal
+#'
+.scale_fill_fun <- function(viridis=TRUE, ...){
+    if(viridis){
+        return(scale_fill_viridis(...))
+    }else{
+        myPalette <- colorRampPalette(rev(brewer.pal(11, "Spectral")))
+        return(
+            scale_fill_gradientn(colours = myPalette(100), ...)
+        )
+    }
 }

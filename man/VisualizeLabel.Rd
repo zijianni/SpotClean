@@ -13,7 +13,7 @@ VisualizeLabel(object, ...)
   label = "tissue",
   subset_barcodes = NULL,
   title = "",
-  legend_title = "Label",
+  legend_title = NULL,
   ...
 )
 
@@ -22,7 +22,7 @@ VisualizeLabel(object, ...)
   label = "tissue",
   subset_barcodes = NULL,
   title = "",
-  legend_title = "Label",
+  legend_title = NULL,
   ...
 )
 }
@@ -47,7 +47,8 @@ Default: \code{NULL}.}
 
 \item{title}{(chr) Title of the plot. Default: \code{""}.}
 
-\item{legend_title}{(chr) Title of the legend. Default: \code{"Label"}.}
+\item{legend_title}{(chr) Title of the legend. Under default,
+use \code{label} as legend title. Default: \code{NULL}.}
 }
 \value{
 A \code{ggplot2} object.

@@ -14,9 +14,10 @@ VisualizeHeatmap(object, ...)
   exp_matrix = NULL,
   subset_barcodes = NULL,
   logged = TRUE,
+  viridis = TRUE,
   legend_range = NULL,
   title = "",
-  legend_title = "Value",
+  legend_title = NULL,
   ...
 )
 
@@ -25,9 +26,10 @@ VisualizeHeatmap(object, ...)
   value,
   subset_barcodes = NULL,
   logged = TRUE,
+  viridis = TRUE,
   legend_range = NULL,
   title = "",
-  legend_title = "Value",
+  legend_title = NULL,
   ...
 )
 }
@@ -56,13 +58,17 @@ Default: \code{NULL}.}
 \item{logged}{(logical) Specify if the color scale is log1p transformed.
 Default: \code{TRUE}.}
 
+\item{viridis}{(logical) If true, color scale uses viridis.
+Otherwise, use rainbow. Default: \code{TRUE}.}
+
 \item{legend_range}{(length 2 vector of num) Custom legend range of the value.
 By default uses the range of the plotted values.
 Default: \code{NULL}.}
 
 \item{title}{(chr) Title of the plot. Default: \code{""}.}
 
-\item{legend_title}{(chr) Title of the legend. Default: \code{"Value"}.}
+\item{legend_title}{(chr) Title of the legend. Under default,
+use \code{value} as legend title. Default: \code{NULL}.}
 }
 \value{
 A \code{ggplot2} object.

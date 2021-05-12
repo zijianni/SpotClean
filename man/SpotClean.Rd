@@ -68,6 +68,6 @@ data(mbrain_raw)
 data(mbrain_slide_info)
 mbrain_obj <- CreateSlide(mbrain_raw,
                           mbrain_slide_info)
-mbrain_decont_obj <- SpotClean(mbrain_obj, candidate_radius=20)
+mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
 mbrain_decont_obj
 }

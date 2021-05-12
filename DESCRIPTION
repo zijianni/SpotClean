@@ -22,6 +22,8 @@ Imports:
     rjson,
     tibble,
     viridis,
+    grDevices,
+    RColorBrewer,
     Seurat
 Suggests: 
     testthat (>= 2.1.0),
