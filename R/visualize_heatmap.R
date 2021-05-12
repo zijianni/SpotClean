@@ -146,6 +146,7 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
     }else{
         legend_breaks <- floor(min(legend_range))+diff(legend_range)/4*0:4
     }
+    legend_breaks <- round(legend_breaks,2)
 
     # plot
     gp <- ggplot(filter(slide,value>0), aes(x = imagecol, y = imagerow, fill = value)) +
@@ -253,6 +254,7 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
     }else{
         legend_breaks <- floor(min(legend_range))+diff(legend_range)/4*0:4
     }
+    legend_breaks <- round(legend_breaks,2)
 
     # plot
     gp <- ggplot(filter(slide,value>0), aes(x = imagecol, y = imagerow, fill = value)) +
