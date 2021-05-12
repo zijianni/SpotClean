@@ -2,17 +2,25 @@
 % Please edit documentation in R/calculate_contamination_score.R
 \name{ARCScore}
 \alias{ARCScore}
+\alias{ARCScore.default}
+\alias{ARCScore.SummarizedExperiment}
 \title{Calculate the ambient RNA contamination (ARC) score}
 \usage{
-ARCScore(count_mat, background_idx)
+ARCScore(object, ...)
+
+\method{ARCScore}{default}(object, background_bcs, ...)
+
+\method{ARCScore}{SummarizedExperiment}(object, ...)
 }
 \arguments{
-\item{count_mat}{(matrix of num) Input gene-by-barcode count matrix.
-Ideally this should be the raw count matrix with all genes and barcodes
-without any filtering.
-Can be either standard matrix format or sparse matrix format.}
+\item{object}{A gene-by-barcode count matrix or a slide object created or
+inherited from \code{CreateSlide()}.
+Ideally this should give the raw count matrix with all genes and barcodes
+without any filtering.}
 
-\item{background_idx}{(vector of int) Indices of background barcodes in
+\item{...}{Arguments passed to other methods}
+
+\item{background_bcs}{(vector of chr) Background barcodes in
 \code{count_mat}. For spatial data, these are background spots not
 covered by tissue. For single-cell data, these are empty droplets not
 containing cells.}
@@ -31,7 +39,10 @@ spots or cell droplets.
 
 data(mbrain_raw)
 data(mbrain_slide_info)
-mbrain_raw <- mbrain_raw[,mbrain_slide_info$slide$barcode]
-background_index <- which(mbrain_slide_info$slide$tissue==0)
-ARCScore(mbrain_raw, background_index)
+background_bcs <- dplyr::filter(mbrain_slide_info$slide, tissue==0)$barcode
+ARCScore(mbrain_raw, background_bcs)
+
+mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+ARCScore(mbrain_obj)
+
 }

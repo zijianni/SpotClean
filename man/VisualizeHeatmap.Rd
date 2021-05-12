@@ -2,26 +2,51 @@
 % Please edit documentation in R/visualize_heatmap.R
 \name{VisualizeHeatmap}
 \alias{VisualizeHeatmap}
+\alias{VisualizeHeatmap.default}
+\alias{VisualizeHeatmap.SummarizedExperiment}
 \title{Visualize spot values on the 2D slide}
 \usage{
-VisualizeHeatmap(
-  slide_obj,
+VisualizeHeatmap(object, ...)
+
+\method{VisualizeHeatmap}{default}(
+  object,
+  value,
+  exp_matrix = NULL,
+  subset_barcodes = NULL,
+  logged = TRUE,
+  legend_range = NULL,
+  title = "",
+  legend_title = "Value",
+  ...
+)
+
+\method{VisualizeHeatmap}{SummarizedExperiment}(
+  object,
   value,
   subset_barcodes = NULL,
   logged = TRUE,
   legend_range = NULL,
   title = "",
-  legend_title = "Value"
+  legend_title = "Value",
+  ...
 )
 }
 \arguments{
-\item{slide_obj}{A slide object created or inherited from
-\code{CreateSlide()}.}
+\item{object}{A slide object created or
+inherited from \code{CreateSlide()}, or a \code{data.frame} of slide
+information with columns: barcodes, tissue, imagerow, imagecol, etc.}
 
-\item{value}{(numeric vector or chr) Either a vector of numeric values for all
-spots, or the name of one gene in an assay specified in \code{assay}.
-In the former case, the order of values in the vector
-should match the spot barcodes in the slide object.}
+\item{...}{Arguments passed to other methods}
+
+\item{value}{(numeric vector or chr) Either a vector of numeric values for
+all spots, or the name of one gene in \code{exp_matrix} or in the expression
+matrix in the slide object.
+In the former case, the order of values in the
+vector should match the spot barcodes in the slide object.}
+
+\item{exp_matrix}{(matrix of num) When \code{value} is a single character
+string, will search the matching gene in \code{exp_matrix} and plot the gene
+expression. Default: \code{NULL}.}
 
 \item{subset_barcodes}{(vector of chr) A subset of spot barcodes to plot.
 By default it plots all spots in the slide object. This can be useful

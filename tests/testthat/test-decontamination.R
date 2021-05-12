@@ -7,24 +7,22 @@ mbrain_obj <- CreateSlide(mbrain_raw,
 # test output
 
 test_that("Decontamination",{
-    expect_silent(mbrain_decont_obj <- TBD(mbrain_obj, candidate_radius=20,
+    expect_silent(mbrain_decont_obj <- SpotClean(mbrain_obj, candidate_radius=20,
                                            maxit = 3, verbose = FALSE))
     expect_s4_class(mbrain_decont_obj,"SummarizedExperiment")
     expect_identical(names(mbrain_decont_obj@assays),"decont")
     expect_equal(metadata(mbrain_decont_obj)$ARC_score, 0.05160659)
-    expect_equal(metadata(mbrain_decont_obj)$bleeding_rate, 0.2471155,
+    expect_equal(metadata(mbrain_decont_obj)$bleeding_rate, 0.3301657,
                  tolerance = 4e-8)
-    expect_equal(metadata(mbrain_decont_obj)$global_contamination_rate, 0.3318779,
+    expect_equal(metadata(mbrain_decont_obj)$global_contamination_rate, 0.2154095,
                  tolerance = 4e-8)
-    expect_equal(metadata(mbrain_decont_obj)$global_contamination_rate, 0.3318779,
-                 tolerance = 4e-8)
-    expect_equal(metadata(mbrain_decont_obj)$weight_matrix[1,1], 3.87e-05,
+    expect_equal(metadata(mbrain_decont_obj)$weight_matrix[1,1], 4.916e-05,
                  tolerance = 4e-8)
     expect_equal(metadata(mbrain_decont_obj)$loglh,
-                 c(167010460, 167198067, 167231862))
+                 c(167030816, 167314060, 167379802))
 
     expect_equal(rowSums(assay(mbrain_decont_obj)),rowSums(assay(mbrain_obj)))
-    expect_equal(assay(mbrain_decont_obj)[1,1],2470.279366)
+    expect_equal(assay(mbrain_decont_obj)[1,1],2645.022778)
 
 })
 
@@ -45,13 +43,13 @@ test_that("Internal computations", {
 
 # test input parameters
 test_that("Data loading", {
-    expect_error(TBD(mbrain_obj, gene_keep = "foo"),
+    expect_error(SpotClean(mbrain_obj, gene_keep = "foo"),
                  "Specified genes not found")
 })
 
 names(mbrain_obj@assays) <- "decont"
 
 test_that("Wrong assay", {
-    expect_error(TBD(mbrain_obj, gene_keep = "foo"),
+    expect_error(SpotClean(mbrain_obj, gene_keep = "foo"),
                  "Cannot find raw data")
 })

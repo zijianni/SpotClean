@@ -1,4 +1,4 @@
 library(testthat)
-library(TBD)
+library(SpotClean)
 
-test_check("TBD")
+test_check("SpotClean")

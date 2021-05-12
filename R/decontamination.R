@@ -1,6 +1,6 @@
 #' @title Decontaminate spot swapping effect in spatial transcriptomics data
 #'
-#' @description This is the main function implementing the TBD method
+#' @description This is the main function implementing the SpotClean method
 #' for decontaminating spot swapping effect in spatial transcriptomics data.
 #'
 #' @param slide_obj A slide object created or inherited from
@@ -52,7 +52,7 @@
 #' data(mbrain_slide_info)
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
-#' mbrain_decont_obj <- TBD(mbrain_obj, candidate_radius=20)
+#' mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
 #' mbrain_decont_obj
 
 
@@ -68,7 +68,7 @@
 #'
 #' @export
 
-TBD <- function(slide_obj, gene_keep=NULL,
+SpotClean <- function(slide_obj, gene_keep=NULL,
                 maxit=30, tol=1,
                 candidate_radius=5*seq_len(6),
                 verbose=TRUE){
@@ -106,7 +106,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
     imagerow <- imagecol <- tissue <- NULL
 
     # calculate ARC score
-    ARC_score <- ARCScore(raw_data, which(slide$tissue==0))
+    ARC_score <- ARCScore(slide_obj)
 
     # estimate spot distance in pixels
     # Note: imagecol may not correspond to col, but correspond to row
@@ -121,7 +121,7 @@ TBD <- function(slide_obj, gene_keep=NULL,
     # Keep highly expressed and highly variable genes
     mean_exp <- rowSums(raw_data)/length(ts_idx)
     if(is.null(gene_keep)){
-        gene_keep <- rownames(KeepHighGene(raw_ts_data, verbose=verbose))
+        gene_keep <- KeepHighGene(raw_ts_data, verbose=verbose)
 
     }else{
         gene_keep <- intersect(gene_keep, rownames(raw_data))
@@ -413,28 +413,39 @@ TBD <- function(slide_obj, gene_keep=NULL,
 
     mu_init <- obs_exp[ts_idx][nonzero_pos]
     mu_init <- mu_init/sum(mu_init)*sum(obs_exp)
-    x_init <- unname(c(cont_rate_init,global_rate_init,mu_init))
-    x_init[c(1,2)] <- pmax(x_init[c(1,2)], 0.1)
+
+    # assign parameter bounds
+    lower_bounds <- rep(0,length(mu_init)+2)
+    lower_bounds[c(1,2)] <- c(sum(obs_exp[bg_idx])/sum(obs_exp),0.1)
+    upper_bounds <- rep(Inf,length(lower_bounds))
+    upper_bounds[c(1,2)] <- 1
 
     # calculate other matrices
     I1tZ <- crossprod(I1_y,obs_exp)
     WtZ <- crossprod(W_y,obs_exp)
 
-    # assign parameter bounds
-    lower_bounds <- rep(0,length(x_init))
-    lower_bounds[c(1,2)] <- c(sum(obs_exp[bg_idx])/sum(obs_exp),0.1)
-    upper_bounds <- rep(Inf,length(x_init))
-    upper_bounds[c(1,2)] <- 1
+    # other candidate initial values
+    cand_init <- list(pmax(c(cont_rate_init,global_rate_init),0.1),
+                      c(0.3,0.3),c(0.5,0.3))
 
     # minimize RSS using L-BFGS-B
-    opt <- optim(x_init, .fn_optim, .gr_optim, method = "L-BFGS-B",
-                 obs_exp=obs_exp, ts_idx=ts_idx,
-                 nonzero_pos = nonzero_pos, n_spots=n_spots,
-                 W_yy=W_yy, WtW=WtW, Wyy_tWyy=Wyy_tWyy,I_yy=I_yy,
-                 I1_yy=I1_yy, WtZ=WtZ, I1tZ=I1tZ,
-                 lower=lower_bounds,
-                 upper=upper_bounds,
-                 control = list(maxit=100))
+    opt_list <- list()
+    for(init in seq_along(cand_init)){
+        x_init <- unname(c(cand_init[[init]],mu_init))
+        opt_list[[init]] <- optim(x_init, .fn_optim, .gr_optim,
+                                  method = "L-BFGS-B",
+                                  obs_exp=obs_exp, ts_idx=ts_idx,
+                                  nonzero_pos = nonzero_pos, n_spots=n_spots,
+                                  W_yy=W_yy, WtW=WtW,
+                                  Wyy_tWyy=Wyy_tWyy,I_yy=I_yy,
+                                  I1_yy=I1_yy, WtZ=WtZ, I1tZ=I1tZ,
+                                  lower=lower_bounds,
+                                  upper=upper_bounds,
+                                  control = list(maxit=100))
+    }
+
+    best_par <- which.min(unlist(lapply(opt_list, function(x) x$value)))
+    opt <- opt_list[[best_par]]
 
     x_final <- numeric(length(ts_idx))
     x_final[nonzero_pos] <- opt$par[-c(1,2)]

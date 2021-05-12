@@ -1,12 +1,12 @@
 ---
-title: "XXX"
+title: "SpotClean adjusts for spot swapping in spatial transcriptomics data"
 authors: "Zijian Ni and Christina Kendziorski"
-package: TBD
+package: SpotClean
 date: "`r Sys.Date()`"
 output: 
     BiocStyle::html_document
 vignette: >
-    %\VignetteIndexEntry{xxx}
+    %\VignetteIndexEntry{SpotClean}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}  
 ---
@@ -18,7 +18,7 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 ```
 
 
-<!-- # Introduction -->
+# Introduction
 
 <!-- Droplet-based single-cell RNA sequencing (scRNA-seq) is a powerful and widely-used approach for profiling genome-wide gene expression  -->
 <!-- in individual cells. Current commercial droplet-based technologies such as 10X Genomics utilize gel beads, each containing  -->
@@ -41,52 +41,58 @@ opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 <!-- Such cells are typically not of interest in downstream analysis and should therefore be removed.  -->
 <!-- The GetCellMat function in `scCB2` may be used toward this end. -->
 
-<!-- # Quick Start -->
+# Quick Start
 
-<!-- ## Installation -->
+## Installation
 
-<!-- Install from Bioconductor: -->
+Install from Bioconductor:
 
-<!-- ```{r, eval=FALSE} -->
-<!-- if (!requireNamespace("BiocManager", quietly = TRUE)) -->
-<!--     install.packages("BiocManager") -->
+```{r, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 
-<!-- BiocManager::install("scCB2") -->
+BiocManager::install("SpotClean")
 
-<!-- ``` -->
+```
 
-<!-- ## All-in-one function -->
+Install via GitHub (https://github.com/zijianni/SpotClean) when not yet available on Bioconductor:
 
-<!-- `QuickCB2` is an all-in-one function to apply CB2 on 10x Cell Ranger raw data and get a matrix of real cells identified by CB2 under default settings. By specifying `AsSeurat = TRUE`, a Seurat object is returned so that users can directly apply the Seurat pipeline for downstream analyses. -->
+```{r, eval=FALSE}
+if(!require(devtools))
+    install.packages("devtools")
+if(!require(SpotClean))
+    devtools::install_github("zijianni/SpotClean", build_manual = TRUE, build_vignettes = TRUE)
+```
 
-<!-- Usage:  -->
-<!-- ```{r, eval=FALSE} -->
-<!-- library(scCB2) -->
+## Short Demo
 
-<!-- # If raw data has three separate files within one directory -->
-<!-- # and you want to control FDR at the default 1%: -->
-<!-- RealCell <-  QuickCB2(dir = "/path/to/raw/data/directory") -->
+Decontaminate the bundled example data
 
-<!-- # If raw data is in HDF5 format and  -->
-<!-- # you'd like a Seurat object under default FDR threshold: -->
-<!-- RealCell_S <-  QuickCB2(h5file = "/path/to/raw/data/HDF5",  -->
-<!--                         AsSeurat = TRUE) -->
-<!-- ``` -->
+```{r, eval=FALSE}
+library(SpotClean)
+data(mbrain_raw)
+data(mbrain_slide_info)
 
-<!-- An example illustrating how it works and what the final output looks like can be found at the end of *Detailed Steps*. -->
+# Load and visualize raw data
+mbrain_obj <- CreateSlide(count_mat = mbrain_raw, slide_info = mbrain_slide_info)
+VisualizeSlide(slide_obj = mbrain_obj)
+VisualizeHeatmap(slide_obj = mbrain_obj,rownames(mbrain_raw)[1])
 
-<!-- ## Running Speed -->
+# Measure contamination level
+ARCScore(count_mat = mbrain_raw, background_bcs = mbrain_slide_info$)
 
-<!-- The computational speed is related to the size and structure of input datasets. As a reference, scCB2 running on a medium-size dataset (around 30,000 genes and 8,000 cells after cell calling) using 6 cores takes less than 10 minutes. -->
+# Decontaminate raw data
+decont_obj <- SpotClean(mbrain_obj)
 
-<!-- ## Saving a sparse matrix to 10x format -->
+# Visualize decontamination
 
-<!-- For users who would like to save the CB2 output cell matrix to 10x format (e.g. "matrix.mtx", "barcodes.tsv" and "genes.tsv"), there are existing packages to help. For example in package `DropletUtils`: -->
+```
 
-<!-- ```{r, eval=FALSE} -->
-<!-- DropletUtils::write10xCounts(path = "/path/to/save/data", -->
-<!--                              x = RealCell) -->
-<!-- ``` -->
+## Running Speed
+
+The computational speed is related to the size and structure of input datasets. SpotClean does not require parallel computation, thus does not eat too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.
+
+
 
 <!-- # Detailed Steps -->
 

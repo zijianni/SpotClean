@@ -10,11 +10,15 @@ mbrain_obj2 <- CreateSlide(mbrain_raw[,mbrain_slide_info2$slide$barcode], mbrain
 test_that("Non-existing column",{
     expect_error(VisualizeLabel(mbrain_obj, label="foo"),
                  "Label name does not exist")
+    expect_error(VisualizeLabel(mbrain_slide_info$slide, label="foo"),
+                 "Label name does not exist")
 
 })
 
 test_that("Invalid input label vector",{
     expect_error(VisualizeLabel(mbrain_obj, label=rnorm(10)),
+                 "Invalid label input")
+    expect_error(VisualizeLabel(mbrain_slide_info$slide, label=rnorm(10)),
                  "Invalid label input")
 
 })

@@ -4,7 +4,13 @@
 \alias{KeepHighGene}
 \title{Filter and return highly expressed or highly variable genes}
 \usage{
-KeepHighGene(count_mat, top_high = 5000, mean_cutoff = 1, verbose = TRUE)
+KeepHighGene(
+  count_mat,
+  top_high = 5000,
+  mean_cutoff = 1,
+  return_matrix = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{count_mat}{(matrix of num) Input count matrix to be filtered.
@@ -16,12 +22,15 @@ within this number of top expressed genes. Default: 5000.}
 \item{mean_cutoff}{(num) Genes with average expressions among all
 spots exceeding this cutoff are kept as highly expressed genes.}
 
+\item{return_matrix}{(logical) Whether return filtered matrix instead
+of gene names. Default: \code{FALSE}}
+
 \item{verbose}{(logical) Whether print progress information.
 Default: \code{TRUE}}
 }
 \value{
-A filtered expression count matrix with the same
-class as \code{count_mat}.
+A vector of gene names or a filtered expression count
+matrix with the same class as \code{count_mat}.
 }
 \description{
 This function is for filtering genes in the expression count
@@ -41,7 +50,8 @@ number of high variable genes.
 data(mbrain_raw)
 data(mbrain_slide_info)
 dim(mbrain_raw)
-mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100)
+mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100,
+                             return_matrix=TRUE)
 dim(mbrain_raw_f)
 
 }

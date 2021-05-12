@@ -2,19 +2,36 @@
 % Please edit documentation in R/visualize_label.R
 \name{VisualizeLabel}
 \alias{VisualizeLabel}
+\alias{VisualizeLabel.default}
+\alias{VisualizeLabel.SummarizedExperiment}
 \title{Visualize spot labels on the 2D slide}
 \usage{
-VisualizeLabel(
-  slide_obj,
+VisualizeLabel(object, ...)
+
+\method{VisualizeLabel}{default}(
+  object,
   label = "tissue",
   subset_barcodes = NULL,
   title = "",
-  legend_title = "Label"
+  legend_title = "Label",
+  ...
+)
+
+\method{VisualizeLabel}{SummarizedExperiment}(
+  object,
+  label = "tissue",
+  subset_barcodes = NULL,
+  title = "",
+  legend_title = "Label",
+  ...
 )
 }
 \arguments{
-\item{slide_obj}{A slide object created or inherited from
-\code{CreateSlide()}.}
+\item{object}{A slide object created or
+inherited from \code{CreateSlide()}, or a \code{data.frame} of slide
+information with columns: barcodes, tissue, imagerow, imagecol, etc.}
+
+\item{...}{Arguments passed to other methods}
 
 \item{label}{(categorical vector or chr) Either a vector of labels for all
 spots, or the column name in the \code{slide} slot of the slide
@@ -51,4 +68,5 @@ mbrain_obj <- CreateSlide(mbrain_raw,
 gp <- VisualizeLabel(mbrain_obj, label="tissue",
                      title="mbrain", legend_title="tissue or background")
 plot(gp)
+
 }

@@ -6,15 +6,12 @@
 #' bound of the average proportion of contaminated expressions in tissue
 #' spots or cell droplets.
 #'
-#' @param count_mat (matrix of num) Input gene-by-barcode count matrix.
-#' Ideally this should be the raw count matrix with all genes and barcodes
+#' @param object A gene-by-barcode count matrix or a slide object created or
+#' inherited from \code{CreateSlide()}.
+#' Ideally this should give the raw count matrix with all genes and barcodes
 #' without any filtering.
-#' Can be either standard matrix format or sparse matrix format.
 #'
-#' @param background_idx (vector of int) Indices of background barcodes in
-#' \code{count_mat}. For spatial data, these are background spots not
-#' covered by tissue. For single-cell data, these are empty droplets not
-#' containing cells.
+#' @param ... Arguments passed to other methods
 #'
 #' @return (num) The ARC score of given data.
 #'
@@ -22,25 +19,82 @@
 #'
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
-#' mbrain_raw <- mbrain_raw[,mbrain_slide_info$slide$barcode]
-#' background_index <- which(mbrain_slide_info$slide$tissue==0)
-#' ARCScore(mbrain_raw, background_index)
-
-#' @importFrom Matrix colSums
-
+#' background_bcs <- dplyr::filter(mbrain_slide_info$slide, tissue==0)$barcode
+#' ARCScore(mbrain_raw, background_bcs)
+#'
+#' mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+#' ARCScore(mbrain_obj)
+#'
+#' @rdname ARCScore
+#'
 #' @export
 
-ARCScore <- function(count_mat, background_idx){
+ARCScore <- function(object, ...) {
+    UseMethod(generic = "ARCScore", object = object)
+}
 
-    if(!all(background_idx%in%seq_len(ncol(count_mat)))){
-        stop("Invalid background indices.")
+
+#' @param background_bcs (vector of chr) Background barcodes in
+#' \code{count_mat}. For spatial data, these are background spots not
+#' covered by tissue. For single-cell data, these are empty droplets not
+#' containing cells.
+#'
+#' @importFrom Matrix colSums
+#' @importFrom methods as
+#'
+#' @method ARCScore default
+#' @rdname ARCScore
+#' @export
+#'
+ARCScore.default <- function(object, background_bcs, ...){
+
+    if (!inherits(x = object, 'Matrix')) {
+        object <- as(object = as.matrix(x = object), Class = 'Matrix')
     }
+    if (!inherits(x = object, what = 'dgCMatrix')) {
+        object <- as(object = object, Class = 'dgCMatrix')
+    }
+
+    if(!all(background_bcs%in%colnames(object))){
+        stop("Invalid background barcodes.")
+    }
+
+    total_counts <- colSums(object)
+    # underestimated contamination per barcode
+    cont <- sum(total_counts[background_bcs])/ncol(object)
+    # expression per tissue/cell barcode
+    ts_bcs <- setdiff(colnames(object),background_bcs)
+    expr <- mean(total_counts[ts_bcs])
+    # proportion
+    arc <- cont/expr
+
+    return(arc)
+}
+
+
+#' @method ARCScore SummarizedExperiment
+#' @rdname ARCScore
+#'
+#' @importFrom SummarizedExperiment assay
+#' @importFrom S4Vectors metadata
+#' @importFrom dplyr filter
+#'
+#' @export
+#'
+ARCScore.SummarizedExperiment <- function(object, ...){
+
+    # junk code... get rid of R CMD check notes
+    tissue <- NULL
+
+    background_bcs <- filter(metadata(object)$slide,tissue==0)$barcode
+    count_mat <- assay(object)
 
     total_counts <- colSums(count_mat)
     # underestimated contamination per barcode
-    cont <- sum(total_counts[background_idx])/ncol(count_mat)
+    cont <- sum(total_counts[background_bcs])/ncol(count_mat)
     # expression per tissue/cell barcode
-    expr <- mean(total_counts[-background_idx])
+    ts_bcs <- setdiff(colnames(count_mat),background_bcs)
+    expr <- mean(total_counts[ts_bcs])
     # proportion
     arc <- cont/expr
 

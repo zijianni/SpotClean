@@ -22,17 +22,21 @@
 #' @param mean_cutoff (num) Genes with average expressions among all
 #' spots exceeding this cutoff are kept as highly expressed genes.
 #'
+#' @param return_matrix (logical) Whether return filtered matrix instead
+#' of gene names. Default: \code{FALSE}
+#'
 #' @param verbose (logical) Whether print progress information.
 #' Default: \code{TRUE}
 #'
-#' @return A filtered expression count matrix with the same
-#' class as \code{count_mat}.
+#' @return A vector of gene names or a filtered expression count
+#' matrix with the same class as \code{count_mat}.
 #'
 #' @examples
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
 #' dim(mbrain_raw)
-#' mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100)
+#' mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100,
+#'                              return_matrix=TRUE)
 #' dim(mbrain_raw_f)
 #'
 #' @importFrom Seurat CreateSeuratObject FindVariableFeatures
@@ -43,7 +47,8 @@
 
 
 KeepHighGene <- function(count_mat, top_high=5000,
-                         mean_cutoff=1, verbose=TRUE){
+                         mean_cutoff=1, return_matrix=FALSE,
+                         verbose=TRUE){
 
     mean_exp <- rowMeans(count_mat)
     # keep at most this number of highly expressed genes.
@@ -66,5 +71,10 @@ KeepHighGene <- function(count_mat, top_high=5000,
                 " highly expressed or highly variable genes.")
     }
 
-    return(count_mat[gene_tokeep,, drop=FALSE])
+    if(return_matrix){
+        return(count_mat[gene_tokeep,, drop=FALSE])
+    }else{
+        return(names(which(gene_tokeep)))
+    }
+
 }
