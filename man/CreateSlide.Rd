@@ -10,7 +10,9 @@ CreateSlide(count_mat, slide_info, gene_cutoff = 0.1, verbose = TRUE)
 \item{count_mat}{(matrix of num) The raw gene-by-barcode count matrix.
 Can be either standard matrix format or sparse matrix format.}
 
-\item{slide_info}{(list) The slide information from \code{Read10xSlide()}.}
+\item{slide_info}{(list or data.frame) A list of slide information from
+\code{Read10xSlide()}, or a data frame only containing spot information
+like barcode, tissue, imagerow, imagecol, etc.}
 
 \item{gene_cutoff}{(num) Filter out genes with average expressions
 among all spots below or equal to this cutoff.
@@ -26,7 +28,8 @@ gene expression and spot metadata.
 \description{
 This function takes input of the count matrix
 (from \code{Read10xRaw} or \code{Read10xRawH5}) and slide information
-(from \code{Read10xSlide}) and outputs a \code{SummarizedExperiment} object
+(from \code{Read10xSlide} or manually specified data frame) and outputs
+a \code{SummarizedExperiment} object
 as our slide object for downstream decontamination and visualization.
 }
 \examples{

@@ -21,3 +21,7 @@ test_that("Gene filtering", {
     expect_true(nrow(slide_obj)==11)
 })
 
+test_that("input data frame",{
+    expect_warning(CreateSlide(mbrain_raw, mbrain_slide_info$slide),
+                   "Input slide info does not contain image")
+})
