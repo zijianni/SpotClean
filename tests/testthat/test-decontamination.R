@@ -20,6 +20,8 @@ test_that("Decontamination",{
                  tolerance = 4e-8)
     expect_equal(metadata(mbrain_decont_obj)$loglh,
                  c(167030816, 167314060, 167379802))
+    expect_equal(unname(metadata(mbrain_decont_obj)$contamination_rate[1:3]),
+                 c(0.06273360, 0.08079689, 0.09040354))
 
     expect_equal(rowSums(assay(mbrain_decont_obj)),rowSums(assay(mbrain_obj)))
     expect_equal(assay(mbrain_decont_obj)[1,1],2645.022778)
