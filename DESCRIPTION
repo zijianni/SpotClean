@@ -39,7 +39,14 @@ biocViews:
     Transcriptomics,
     Preprocessing
 Description: 
-    Malformed Description field: should contain one or more complete sentences.
+    SpotClean is a computational method to adjust for spot swapping in spatial 
+    transcriptomics data. Recent spatial transcriptomics experiments utilize 
+    slides containing thousands of spots with spot-specific barcodes that bind 
+    mRNA. Ideally, unique molecular identifiers at a spot measure spot-specific 
+    expression, but this is often not the case due to bleed from nearby spots, 
+    an artifact we refer to as spot swapping. SpotClean is able to 
+    decontaminate the spot swapping contamination and increase the 
+    sensitivity and precision of downstream analyses. 
 License: GPL-3
 NeedsCompilation: yes
 VignetteBuilder: knitr
