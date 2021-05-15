@@ -4,11 +4,13 @@
 \alias{VisualizeSlide}
 \title{Visualize the Visium slide image}
 \usage{
-VisualizeSlide(slide_obj)
+VisualizeSlide(slide_obj, title = "")
 }
 \arguments{
 \item{slide_obj}{A slide object created or inherited from
 \code{CreateSlide()}.}
+
+\item{title}{(chr) Title of the plot. Default: \code{""}.}
 }
 \value{
 A \code{ggplot2} object.

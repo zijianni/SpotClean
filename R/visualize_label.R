@@ -50,9 +50,8 @@ VisualizeLabel <- function(object, ...) {
 #' @param legend_title (chr) Title of the legend. Under default,
 #' use \code{label} as legend title. Default: \code{NULL}.
 #'
-#' @import ggplot2
-#' @importFrom dplyr filter
-#' @importFrom S4Vectors metadata
+
+
 #' @importFrom methods as
 #'
 #' @method VisualizeLabel default
@@ -61,74 +60,46 @@ VisualizeLabel <- function(object, ...) {
 #' @export
 
 VisualizeLabel.default <- function(object, label="tissue",
-                           subset_barcodes=NULL, title="",
-                           legend_title=NULL, ...){
-
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- barcode <- NULL
+                                   subset_barcodes=NULL, title="",
+                                   legend_title=NULL, ...){
 
     if (!inherits(x = object, "data.frame")) {
         object <- as(object = object, Class = "data.frame")
     }
 
-
-    # manipulate label to plot
-    if(length(label)==1){
-
-        if(!label%in%colnames(object)){
-            stop("Label name does not exist in slide metadata.")
-        }
-        if(is.null(legend_title)){
-            legend_title <- label
-        }
-        label <- object[,label]
-
-    }else if(length(label)==nrow(object)){
-
-        label <- as.character(label)
-
-    }else{
-        stop("Invalid label input.")
-    }
-
     slide <- object
-    slide$label <- label
 
-    # subsetting barcodes
-    if(!is.null(subset_barcodes)){
-        slide <- filter(slide, barcode%in%subset_barcodes)
-    }
-
-    # plot
-    gp <- ggplot(slide, aes(x=imagecol,y=imagerow, fill=factor(label))) +
-        geom_point(shape = 21, size = 1.75, color="white")+
-        coord_cartesian(expand=FALSE)+
-        xlim(0,max(slide$width))+
-        ylim(max(slide$height),0)+
-        xlab("") +
-        ylab("") +
-        ggtitle(title)+
-        labs(fill = legend_title)+
-        guides(fill = guide_legend(override.aes = list(size=3)))+
-        theme_set(theme_bw(base_size = 10))+
-        theme(panel.grid.major = element_blank(),
-              panel.grid.minor = element_blank(),
-              panel.background = element_blank(),
-              axis.line = element_line(colour = "black"),
-              axis.text = element_blank(),
-              axis.ticks = element_blank())
-
+    gp <- .visualize_label(slide, label,
+                           subset_barcodes, title,
+                           legend_title, ...)
     return(gp)
 
 }
 
 #' @method VisualizeLabel SummarizedExperiment
 #' @rdname VisualizeLabel
+#' @importFrom S4Vectors metadata
 #' @export
 #'
 VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
                                                 subset_barcodes=NULL, title="",
                                                 legend_title=NULL, ...){
+
+    slide <- metadata(object)$slide
+
+    gp <- .visualize_label(slide, label,
+                           subset_barcodes, title,
+                           legend_title, ...)
+    return(gp)
+
+}
+
+#' @import ggplot2
+#' @importFrom dplyr filter
+#'
+.visualize_label <- function(slide, label="tissue",
+                             subset_barcodes=NULL, title="",
+                             legend_title=NULL, ...){
 
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- barcode <- NULL
@@ -136,15 +107,15 @@ VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
     # manipulate label to plot
     if(length(label)==1){
 
-        if(!label%in%colnames(metadata(object)$slide)){
+        if(!label%in%colnames(slide)){
             stop("Label name does not exist in slide metadata.")
         }
         if(is.null(legend_title)){
             legend_title <- label
         }
-        label <- metadata(object)$slide[,label]
+        label <- slide[,label]
 
-    }else if(length(label)==ncol(object)){
+    }else if(length(label)==nrow(slide)){
 
         label <- as.character(label)
 
@@ -152,7 +123,6 @@ VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
         stop("Invalid label input.")
     }
 
-    slide <- metadata(object)$slide
     slide$label <- label
 
     # subsetting barcodes
@@ -180,5 +150,6 @@ VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
               axis.ticks = element_blank())
 
     return(gp)
+
 
 }

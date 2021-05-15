@@ -7,6 +7,8 @@
 #' @param slide_obj A slide object created or inherited from
 #' \code{CreateSlide()}.
 #'
+#' @param title (chr) Title of the plot. Default: \code{""}.
+#'
 #' @return A \code{ggplot2} object.
 #'
 #' @examples
@@ -25,7 +27,7 @@
 #'
 #' @export
 
-VisualizeSlide <- function(slide_obj){
+VisualizeSlide <- function(slide_obj, title=""){
 
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- NULL
@@ -48,6 +50,7 @@ VisualizeSlide <- function(slide_obj){
         ylim(max(slide$height), 0) +
         xlab("") +
         ylab("") +
+        ggtitle(title)+
         guides(fill = guide_legend(override.aes = list(size = 3))) +
         theme_set(theme_bw(base_size = 10)) +
         theme(

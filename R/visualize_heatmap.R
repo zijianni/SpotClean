@@ -64,10 +64,6 @@ VisualizeHeatmap <- function(object, ...) {
 #' @param legend_title (chr) Title of the legend. Under default,
 #' use \code{value} as legend title. Default: \code{NULL}.
 #'
-#' @import ggplot2
-#' @importFrom dplyr filter
-#' @importFrom SummarizedExperiment assay
-#' @importMethodsFrom S4Vectors metadata
 #' @importFrom methods as
 #'
 #' @method VisualizeHeatmap default
@@ -82,14 +78,60 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
                              title="", legend_title=NULL,
                              ...){
 
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- barcode <- NULL
-
     if (!inherits(x = object, "data.frame")) {
         object <- as(object = object, Class = "data.frame")
     }
 
     slide <- object
+
+    gp <- .visualize_heatmap(slide, value, exp_matrix,
+                             subset_barcodes,
+                             logged, viridis,
+                             legend_range,
+                             title, legend_title,
+                             ...)
+    return(gp)
+}
+
+
+#' @method VisualizeHeatmap SummarizedExperiment
+#' @rdname VisualizeHeatmap
+#' @importFrom SummarizedExperiment assay
+#' @importMethodsFrom S4Vectors metadata
+#' @export
+#'
+VisualizeHeatmap.SummarizedExperiment <- function(object, value,
+                                     subset_barcodes=NULL,
+                                     logged=TRUE, viridis=TRUE,
+                                     legend_range=NULL,
+                                     title="", legend_title=NULL,
+                                     ...){
+
+    slide <- metadata(object)$slide
+    exp_matrix <- assay(object)
+
+    gp <- .visualize_heatmap(slide, value, exp_matrix,
+                       subset_barcodes,
+                       logged, viridis,
+                       legend_range,
+                       title, legend_title,
+                       ...)
+    return(gp)
+}
+
+
+#' @import ggplot2
+#' @importFrom dplyr filter
+#'
+.visualize_heatmap <- function(slide, value, exp_matrix=NULL,
+                               subset_barcodes=NULL,
+                               logged=TRUE, viridis=TRUE,
+                               legend_range=NULL,
+                               title="", legend_title=NULL,
+                               ...){
+    # junk code... get rid of R CMD check notes
+    imagerow <- imagecol <- barcode <- NULL
+
 
     # manipulate value to plot
     if(length(value)==1 & is.character(value)){
@@ -123,10 +165,9 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
             slide$value <- value[slide$barcode]
         }
 
-    }else if(length(value)==nrow(object)){
+    }else if(length(value)==ncol(slide)){
         # values to plot is directly given
         slide$value <- as.numeric(value)
-
     }else{
         stop("Invalid value input.")
     }
@@ -138,7 +179,8 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 
     # setup legend breaks
     if(is.null(legend_range)){
-        legend_range <- c(0,max(slide$value, na.rm = TRUE))
+        legend_range <- c(min(0,min(slide$value, na.rm = TRUE)),
+                          max(slide$value, na.rm = TRUE))
     }
     if(logged){
         legend_breaks <- floor(expm1( log1p(min(legend_range))+
@@ -148,121 +190,24 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
     }
     legend_breaks <- round(legend_breaks,2)
 
+    if(min(legend_range)==0){
+        slide_show <- filter(slide,value>0)
+        slide_hide <- filter(slide, value==0)
+    }else{
+        slide_show <- filter(slide,
+                             value>=min(legend_range),value<=max(legend_range))
+        slide_hide <- filter(slide,
+                             value<min(legend_range) | value>max(legend_range))
+        warning(nrow(slide_hide), " spots outside specified range.\n")
+    }
+
     # plot
-    gp <- ggplot(filter(slide,value>0), aes(x = imagecol, y = imagerow, fill = value)) +
+    gp <- ggplot(slide_show, aes(x = imagecol, y = imagerow, fill = value)) +
         geom_point(
             shape = 21,
             colour = "white",
             size = 1.75) +
-        geom_point(data=filter(slide, value==0),
-               shape = 21,
-               colour = "white",
-               fill="#d6d6d6",
-               size = 1.75,
-               alpha=0.3
-        ) +
-        coord_cartesian(expand = FALSE) +
-        .scale_fill_fun(viridis=viridis,
-                       trans = ifelse(logged,"log1p","identity"),
-                       breaks=legend_breaks, limits=legend_range) +
-        xlim(0, max(slide$width)) +
-        ylim(max(slide$height), 0) +
-        xlab("") +
-        ylab("") +
-        ggtitle(title) +
-        labs(fill = legend_title) +
-        theme_set(theme_bw(base_size = 10)) +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.background = element_blank(),
-            axis.line = element_line(colour = "black"),
-            axis.text = element_blank(),
-            axis.ticks = element_blank()
-        )
-
-    return(gp)
-}
-
-
-#' @method VisualizeHeatmap SummarizedExperiment
-#' @rdname VisualizeHeatmap
-#' @export
-#'
-VisualizeHeatmap.SummarizedExperiment <- function(object, value,
-                                     subset_barcodes=NULL,
-                                     logged=TRUE, viridis=TRUE,
-                                     legend_range=NULL,
-                                     title="", legend_title=NULL,
-                                     ...){
-
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- barcode <- NULL
-
-    slide <- metadata(object)$slide
-
-    # manipulate value to plot
-    if(length(value)==1 & is.character(value)){
-
-        exp_matrix <- assay(object)
-        if(is.null(legend_title)){
-            legend_title <- value
-        }
-
-        # value to plot is in slide dataframe
-        if(value%in%colnames(slide)){
-            slide$value <- slide[,value]
-        }else{
-            # value to plot is in given matrix
-            if(!value%in%rownames(exp_matrix)){
-                stop("Specified gene does not exist in the expression matrix.")
-            }
-
-            # if expression matrix does not match slide info
-            shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
-            if(length(shared_bcs)==0){
-                stop("Barcodes in input matrix do not ",
-                     "match any barcodes in slide.")
-            }
-            missed_bcs <- setdiff(slide$barcode,shared_bcs)
-
-            value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
-            names(value) <- c(shared_bcs, missed_bcs)
-            slide$value <- value[slide$barcode]
-        }
-
-    }else if(length(value)==ncol(object)){
-
-        slide$value <- as.numeric(value)
-
-    }else{
-        stop("Invalid value input.")
-    }
-
-    # subsetting barcodes
-    if(!is.null(subset_barcodes)){
-        slide <- filter(slide, barcode%in%subset_barcodes)
-    }
-
-    # setup legend breaks
-    if(is.null(legend_range)){
-        legend_range <- c(0,max(slide$value, na.rm = TRUE))
-    }
-    if(logged){
-        legend_breaks <- floor(expm1( log1p(min(legend_range))+
-                                          diff(log1p(legend_range))/4*0:4 ))
-    }else{
-        legend_breaks <- floor(min(legend_range))+diff(legend_range)/4*0:4
-    }
-    legend_breaks <- round(legend_breaks,2)
-
-    # plot
-    gp <- ggplot(filter(slide,value>0), aes(x = imagecol, y = imagerow, fill = value)) +
-        geom_point(
-            shape = 21,
-            colour = "white",
-            size = 1.75) +
-        geom_point(data=filter(slide, value==0),
+        geom_point(data=slide_hide,
                    shape = 21,
                    colour = "white",
                    fill="#d6d6d6",
@@ -271,8 +216,8 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
         ) +
         coord_cartesian(expand = FALSE) +
         .scale_fill_fun(viridis=viridis,
-                       trans = ifelse(logged,"log1p","identity"),
-                       breaks=legend_breaks, limits=legend_range) +
+                        trans = ifelse(logged,"log1p","identity"),
+                        breaks=legend_breaks, limits=legend_range) +
         xlim(0, max(slide$width)) +
         ylim(max(slide$height), 0) +
         xlab("") +
