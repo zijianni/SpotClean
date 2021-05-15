@@ -14,7 +14,7 @@ test_that("Decontamination",{
     expect_equal(metadata(mbrain_decont_obj)$ARC_score, 0.05160659)
     expect_equal(metadata(mbrain_decont_obj)$bleeding_rate, 0.3301657,
                  tolerance = 4e-8)
-    expect_equal(metadata(mbrain_decont_obj)$kernel_mixture_rate, 0.2154095,
+    expect_equal(metadata(mbrain_decont_obj)$distal_rate, 0.2154095,
                  tolerance = 4e-8)
     expect_equal(metadata(mbrain_decont_obj)$weight_matrix[1,1], 4.916e-05,
                  tolerance = 4e-8)

@@ -32,7 +32,7 @@
 #' @return A slide object where the decontaminated expression matrix is in the
 #' "decont" assay slot and the contamination statistics are in
 #' metadata slots. Contamination statistics include ambient RNA contamination
-#' (ARC) score, bleeeding rate, kernel mixture rate, contamination radius,
+#' (ARC) score, bleeeding rate, distal rate, contamination radius,
 #' contamination kernel weight matrix, log-likelihood value in each iteration,
 #' estimated proportion of contamination in each tissue spot in observed data.
 #' Since decontaminated and raw data have different columns, they can
@@ -42,9 +42,10 @@
 #' @details Briefly, the contamination level for the slide is estimated based on
 #' the total counts of all spots. UMI counts travelling around the slide are
 #' assumed to follow Poisson distributions and modeled by a mixture of
-#' Gaussian and uniform kernels. The underlying uncontaminated gene expressions
-#' are estimated by EM algorithm to maximize the data likelihood. Detailed
-#' derivation can be found in our manuscript.
+#' Gaussian (proximal) and uniform (distal) kernels. The underlying
+#' uncontaminated gene expressions are estimated by EM algorithm to
+#' maximize the data likelihood. Detailed derivation can be found in our
+#' manuscript.
 #'
 #'
 #' @examples
@@ -170,7 +171,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     # Find the best solution
     best_radius <- which.min(unlist(lapply(cont_out,function(x) x$value)))
     bleed_rate <- cont_out[[best_radius]]$par[1]
-    kernel_mix_rate <- cont_out[[best_radius]]$par[2]
+    distal_rate <- cont_out[[best_radius]]$par[2]
     cont_radius <- candidate_radius[best_radius]
 
     # contamination weight matrix
@@ -178,7 +179,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
                                      .points_to_sdv(cont_radius, spot_distance))
     slide_weight <- slide_weight[ts_idx,]/rowSums(slide_weight[ts_idx,])
     bleed_weight_mat <- bleed_rate*(
-        kernel_mix_rate/n_spots+(1-kernel_mix_rate)*slide_weight
+        distal_rate/n_spots+(1-distal_rate)*slide_weight
     )
 
     #############################
@@ -196,7 +197,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     decont_out <- .decont_EM(raw_data=raw_data[gene_keep,],
                              decont_data_init = decont_data_init,
                              bleed_rate=bleed_rate,
-                             kernel_mix_rate=kernel_mix_rate,
+                             distal_rate=distal_rate,
                              slide_weight = slide_weight,
                              ts_idx = ts_idx,
                              maxit=maxit,
@@ -225,13 +226,13 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     # Calculation contamination rate in each tissue spot
     decont_total_counts <- colSums(decont_data)
     cont_rate <- .calculate_cont_rate(total_counts, decont_total_counts,
-                                      bleed_rate, kernel_mix_rate,
+                                      bleed_rate, distal_rate,
                                       bleed_weight_mat, n_spots)
 
     # write results
     meta <- c(metadata(slide_obj), list(
         bleeding_rate=bleed_rate,
-        kernel_mixture_rate=kernel_mix_rate,
+        distal_rate=distal_rate,
         contamination_radius=cont_radius,
         weight_matrix=bleed_weight_mat,
         loglh=decont_out$loglh,
@@ -296,7 +297,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 }
 
 .decont_EM <- function(raw_data, decont_data_init,
-                       bleed_rate, kernel_mix_rate,
+                       bleed_rate, distal_rate,
                        slide_weight, ts_idx,
                        maxit=30, tol=1,
                        verbose=TRUE){
@@ -306,7 +307,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     #   decont_data_init (matrix of num): initial value of decontaminated
     #       expression matrix
     #   bleed_rate (num): bleeding rate
-    #   kernel_mix_rate (num): kernel mixture rate
+    #   distal_rate (num): distal rate
     #   slide_weight (matrix of num): Gaussian weight matrix
     #   ts_idx (vector of int): indices of tissue spots
     #   maxit (int): maximum number of iteration
@@ -327,7 +328,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     N_spot <- ncol(raw_data)
     N_ts_spot <- length(ts_idx)
     bleed_weight_mat <- bleed_rate*(
-        kernel_mix_rate/N_spot+(1-kernel_mix_rate)*slide_weight
+        distal_rate/N_spot+(1-distal_rate)*slide_weight
     )
 
     # Iteration
@@ -345,8 +346,8 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
         S_ <- (1-bleed_rate)*raw_ts_data*decont_data/Eta[,ts_idx]
         # contamination
         C_ <- (raw_data/Eta)%*%t(slide_weight)*
-            decont_data*bleed_rate*(1-kernel_mix_rate)+
-            decont_data*bleed_rate*kernel_mix_rate/N_spot *
+            decont_data*bleed_rate*(1-distal_rate)+
+            decont_data*bleed_rate*distal_rate/N_spot *
             rowSums(raw_data/Eta)
 
 
@@ -413,9 +414,9 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     bg_quant <- quantile(obs_exp[bg_idx], c(0.25, 0.5))
     bg_trim <- obs_exp[bg_idx]>=bg_quant[1] & obs_exp[bg_idx]<=bg_quant[2]
     uniform_cont <- mean(obs_exp[bg_idx][bg_trim])
-    kernel_mix_rate_init <- uniform_cont/sum(obs_exp[bg_idx])*length(bg_idx)
+    distal_rate_init <- uniform_cont/sum(obs_exp[bg_idx])*length(bg_idx)
     # trim the initial value
-    kernel_mix_rate_init <- min(kernel_mix_rate_init, 0.5)
+    distal_rate_init <- min(distal_rate_init, 0.5)
 
     mu_init <- obs_exp[ts_idx][nonzero_pos]
     mu_init <- mu_init/sum(mu_init)*sum(obs_exp)
@@ -431,7 +432,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     WtZ <- crossprod(W_y,obs_exp)
 
     # other candidate initial values
-    cand_init <- list(pmax(c(bleed_rate_init,kernel_mix_rate_init),0.1),
+    cand_init <- list(pmax(c(bleed_rate_init,distal_rate_init),0.1),
                       c(0.3,0.3),c(0.5,0.3))
 
     # minimize RSS using L-BFGS-B
@@ -461,22 +462,22 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 }
 
 .calculate_cont_rate <- function(total_counts, decont_total_counts,
-                                 bleed_rate, kernel_mix_rate,
+                                 bleed_rate, distal_rate,
                                  bleed_weight_mat, n_spots){
     # Estimate proportion of contamination in each tissue spot in observed data
 
     # expression originated from the spot = non-bled expression +
     # contamination going to itself
     stayed_counts <- decont_total_counts*(1-bleed_rate)+
-        decont_total_counts*bleed_rate*kernel_mix_rate/n_spots+
-        decont_total_counts*bleed_rate*(1-kernel_mix_rate)*
+        decont_total_counts*bleed_rate*distal_rate/n_spots+
+        decont_total_counts*bleed_rate*(1-distal_rate)*
         diag(bleed_weight_mat[names(decont_total_counts),
                               names(decont_total_counts)])
 
     # fitted total expression = stayed + received
     fitted_total_counts <- decont_total_counts*(1-bleed_rate)+
-        sum(decont_total_counts)*bleed_rate*kernel_mix_rate/n_spots+
-        ((decont_total_counts*bleed_rate*(1-kernel_mix_rate))%*%
+        sum(decont_total_counts)*bleed_rate*distal_rate/n_spots+
+        ((decont_total_counts*bleed_rate*(1-distal_rate))%*%
              bleed_weight_mat)[,names(decont_total_counts)]
 
     received_counts <- fitted_total_counts-stayed_counts
@@ -492,7 +493,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 
     x_coef <- x[-c(1,2)]
     x_c_rate <- x[1] # bleed_rate
-    x_g_rate <- x[2] # kernel_mix_rate
+    x_g_rate <- x[2] # distal_rate
 
     x_coef%*%.AtA(x_c_rate, x_g_rate,
                   WtW[nonzero_pos,nonzero_pos],
@@ -518,12 +519,12 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     x_coef <- numeric(N)
     x_coef[nonzero_pos] <- x[-c(1,2)]
     x_c_rate <- x[1] # bleed_rate
-    x_g_rate <- x[2] # kernel_mix_rate
+    x_g_rate <- x[2] # distal_rate
 
 
     x_coef1 <- x[-c(1,2)]
     x_c_rate <- x[1] # bleed_rate
-    x_g_rate <- x[2] # kernel_mix_rate
+    x_g_rate <- x[2] # distal_rate
 
 
     # gradient of spots expressions
@@ -548,7 +549,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
                              I1tZ[nonzero_pos], n_spots,
                              obs_exp[ts_idx[nonzero_pos]]),x_coef1)
 
-    # gradient of kernel mixture rate
+    # gradient of distal rate
     g_g_rate <- x_coef1%*%.dAtA_dc(x_c_rate, x_g_rate,
                                    WtW[nonzero_pos,nonzero_pos],
                                    Wyy_tWyy[nonzero_pos,nonzero_pos],
@@ -564,37 +565,37 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 
 # below are other internal functions for gradient calculation
 
-.AtA <- function(bleed_rate, kernel_mix_rate, WtW,
+.AtA <- function(bleed_rate, distal_rate, WtW,
                  I_yy, Wyy_tWyy,I1_yy, n_spots){
     (1-bleed_rate)^2*I_yy+
-        bleed_rate^2*(1-kernel_mix_rate)^2*WtW+
-        bleed_rate*(1-bleed_rate)*(1-kernel_mix_rate)*Wyy_tWyy+
-        bleed_rate*kernel_mix_rate*(2-bleed_rate*kernel_mix_rate)/n_spots*I1_yy
+        bleed_rate^2*(1-distal_rate)^2*WtW+
+        bleed_rate*(1-bleed_rate)*(1-distal_rate)*Wyy_tWyy+
+        bleed_rate*distal_rate*(2-bleed_rate*distal_rate)/n_spots*I1_yy
 }
 
-.AtZ <- function(bleed_rate, kernel_mix_rate, WtZ, I1tZ, obs_ts_exp, n_spots){
-    (1-bleed_rate)*obs_ts_exp+bleed_rate*(1-kernel_mix_rate)*WtZ+
-        bleed_rate*kernel_mix_rate/n_spots*I1tZ
+.AtZ <- function(bleed_rate, distal_rate, WtZ, I1tZ, obs_ts_exp, n_spots){
+    (1-bleed_rate)*obs_ts_exp+bleed_rate*(1-distal_rate)*WtZ+
+        bleed_rate*distal_rate/n_spots*I1tZ
 }
 
-.dAtA_dr <- function(bleed_rate, kernel_mix_rate,
+.dAtA_dr <- function(bleed_rate, distal_rate,
                      WtW, I_yy, Wyy_tWyy,I1_yy, n_spots){
-    2*(bleed_rate-1)*I_yy+2*bleed_rate*(1-kernel_mix_rate)^2*WtW+
-        (1-2*bleed_rate)*(1-kernel_mix_rate)*Wyy_tWyy+
-        2*(kernel_mix_rate-bleed_rate*kernel_mix_rate^2)/n_spots*I1_yy
+    2*(bleed_rate-1)*I_yy+2*bleed_rate*(1-distal_rate)^2*WtW+
+        (1-2*bleed_rate)*(1-distal_rate)*Wyy_tWyy+
+        2*(distal_rate-bleed_rate*distal_rate^2)/n_spots*I1_yy
 }
 
-.dAtZ_dr <- function(bleed_rate, kernel_mix_rate,
+.dAtZ_dr <- function(bleed_rate, distal_rate,
                      WtZ, I1tZ, n_spots, obs_ts_exp){
-    (1-kernel_mix_rate)*WtZ+kernel_mix_rate/n_spots*I1tZ-obs_ts_exp
+    (1-distal_rate)*WtZ+distal_rate/n_spots*I1tZ-obs_ts_exp
 
 }
 
-.dAtA_dc <- function(bleed_rate, kernel_mix_rate,
+.dAtA_dc <- function(bleed_rate, distal_rate,
                      WtW, Wyy_tWyy, n_spots, I1_yy){
-    2*bleed_rate^2*(kernel_mix_rate-1)*WtW+
+    2*bleed_rate^2*(distal_rate-1)*WtW+
         bleed_rate*(bleed_rate-1)*Wyy_tWyy+
-        2*(bleed_rate-bleed_rate^2*kernel_mix_rate)/n_spots*I1_yy
+        2*(bleed_rate-bleed_rate^2*distal_rate)/n_spots*I1_yy
 }
 
 .dAtZ_dc <- function(bleed_rate, WtZ, I1tZ, n_spots){

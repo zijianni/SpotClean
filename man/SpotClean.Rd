@@ -44,7 +44,7 @@ Default: \code{TRUE}}
 A slide object where the decontaminated expression matrix is in the
 "decont" assay slot and the contamination statistics are in
 metadata slots. Contamination statistics include ambient RNA contamination
-(ARC) score, bleeeding rate, kernel mixture rate, contamination radius,
+(ARC) score, bleeeding rate, distal rate, contamination radius,
 contamination kernel weight matrix, log-likelihood value in each iteration,
 estimated proportion of contamination in each tissue spot in observed data.
 Since decontaminated and raw data have different columns, they can
@@ -59,9 +59,10 @@ for decontaminating spot swapping effect in spatial transcriptomics data.
 Briefly, the contamination level for the slide is estimated based on
 the total counts of all spots. UMI counts travelling around the slide are
 assumed to follow Poisson distributions and modeled by a mixture of
-Gaussian and uniform kernels. The underlying uncontaminated gene expressions
-are estimated by EM algorithm to maximize the data likelihood. Detailed
-derivation can be found in our manuscript.
+Gaussian (proximal) and uniform (distal) kernels. The underlying
+uncontaminated gene expressions are estimated by EM algorithm to
+maximize the data likelihood. Detailed derivation can be found in our
+manuscript.
 }
 \examples{
 
