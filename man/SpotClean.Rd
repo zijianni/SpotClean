@@ -44,7 +44,7 @@ Default: \code{TRUE}}
 A slide object where the decontaminated expression matrix is in the
 "decont" assay slot and the contamination statistics are in
 metadata slots. Contamination statistics include ambient RNA contamination
-(ARC) score, bleeeding rate, global contamination rate, contamination radius,
+(ARC) score, bleeeding rate, kernel mixture rate, contamination radius,
 contamination kernel weight matrix, log-likelihood value in each iteration,
 estimated proportion of contamination in each tissue spot in observed data.
 Since decontaminated and raw data have different columns, they can
