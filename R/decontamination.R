@@ -178,9 +178,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     slide_weight <- .gaussian_kernel(slide_distance,
                                      .points_to_sdv(cont_radius, spot_distance))
     slide_weight <- slide_weight[ts_idx,]/rowSums(slide_weight[ts_idx,])
-    bleed_weight_mat <- bleed_rate*(
-        distal_rate/n_spots+(1-distal_rate)*slide_weight
-    )
+    weight_mat <- distal_rate/n_spots+(1-distal_rate)*slide_weight
 
     #############################
     # Step 2: Decontaminate expression matrix
@@ -225,16 +223,16 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 
     # Calculation contamination rate in each tissue spot
     decont_total_counts <- colSums(decont_data)
-    cont_rate <- .calculate_cont_rate(total_counts, decont_total_counts,
+    cont_rate <- .calculate_cont_rate(decont_total_counts,
                                       bleed_rate, distal_rate,
-                                      bleed_weight_mat, n_spots)
+                                      weight_mat, n_spots)
 
     # write results
     meta <- c(metadata(slide_obj), list(
         bleeding_rate=bleed_rate,
         distal_rate=distal_rate,
         contamination_radius=cont_radius,
-        weight_matrix=bleed_weight_mat,
+        weight_matrix=weight_mat,
         loglh=decont_out$loglh,
         decontaminated_genes=gene_keep,
         contamination_rate=cont_rate,
@@ -461,24 +459,23 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     return(list(opt))
 }
 
-.calculate_cont_rate <- function(total_counts, decont_total_counts,
+.calculate_cont_rate <- function(decont_total_counts,
                                  bleed_rate, distal_rate,
-                                 bleed_weight_mat, n_spots){
+                                 weight_mat, n_spots){
     # Estimate proportion of contamination in each tissue spot in observed data
 
     # expression originated from the spot = non-bled expression +
     # contamination going to itself
+
     stayed_counts <- decont_total_counts*(1-bleed_rate)+
-        decont_total_counts*bleed_rate*distal_rate/n_spots+
-        decont_total_counts*bleed_rate*(1-distal_rate)*
-        diag(bleed_weight_mat[names(decont_total_counts),
+        decont_total_counts*bleed_rate*
+        diag(weight_mat[names(decont_total_counts),
                               names(decont_total_counts)])
 
     # fitted total expression = stayed + received
     fitted_total_counts <- decont_total_counts*(1-bleed_rate)+
-        sum(decont_total_counts)*bleed_rate*distal_rate/n_spots+
-        ((decont_total_counts*bleed_rate*(1-distal_rate))%*%
-             bleed_weight_mat)[,names(decont_total_counts)]
+        ((decont_total_counts*bleed_rate)%*%
+             weight_mat)[,names(decont_total_counts)]
 
     received_counts <- fitted_total_counts-stayed_counts
 
