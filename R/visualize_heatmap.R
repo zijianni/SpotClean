@@ -165,7 +165,7 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
             slide$value <- value[slide$barcode]
         }
 
-    }else if(length(value)==ncol(slide)){
+    }else if(length(value)==nrow(slide)){
         # values to plot is directly given
         slide$value <- as.numeric(value)
     }else{
