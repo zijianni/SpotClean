@@ -1,10 +1,17 @@
 #' @title Calculate the ambient RNA contamination (ARC) score
 #'
-#' @description The ARC score is intended for measuring the level of
-#' contamination caused by ambient RNAs for a given sptial transcriptomics
+#' @description The ARC score is intended for subjectively measuring the level
+#' of contamination caused by ambient RNAs for a given sptial transcriptomics
 #' or droplet-based single-cell RNA-seq data. Intuitively, this score is a lower
 #' bound of the average proportion of contaminated expressions in tissue
 #' spots or cell droplets.
+#'
+#' This lower bound is very conservative as it only
+#' accounts for contamination in background spots or empty droplets, neglecting
+#' contamination in tissue spots or cell droplets. However, it is totally
+#' subjective, not relying on any complicated assumptions and modelling.
+#' ARC score serves as a relative contamination measurement for comparison
+#' among different datasets and protocols.
 #'
 #' @param object A gene-by-barcode count matrix or a slide object created or
 #' inherited from \code{CreateSlide()}.
