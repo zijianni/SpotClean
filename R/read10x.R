@@ -1,15 +1,15 @@
-#' @name Read10x
+#' @name Read10xRaw
 #'
 #' @title Read 10x Space Ranger output data
 #'
-#' @description \code{Read10xRaw} is a one-line handy function for reading
+#' @description \code{Read10xRaw()} is a one-line handy function for reading
 #' the raw expression data from 10x Space Ranger outputs and producing a count
 #' matrix as an R object.
 #'
-#' \code{Read10xRawH5} is for reading 10x Space Ranger
+#' \code{Read10xRawH5()} is for reading 10x Space Ranger
 #' output HDF5 file (ended with .h5).
 #'
-#' \code{Read10xSlide} is for reading slide
+#' \code{Read10xSlide()} is for reading slide
 #' information (e.g. spot positions) and the tissue image from 10x
 #' Space Ranger outputs. This function is developed based on 10x's secondary
 #' analysis pipeline
