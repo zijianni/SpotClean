@@ -15,31 +15,18 @@ vignette: >
 ```{r, echo=FALSE, results="hide", message=FALSE}
 require(knitr)
 opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+set.seed(1)
 ```
 
 
 # Introduction
 
-<!-- Droplet-based single-cell RNA sequencing (scRNA-seq) is a powerful and widely-used approach for profiling genome-wide gene expression  -->
-<!-- in individual cells. Current commercial droplet-based technologies such as 10X Genomics utilize gel beads, each containing  -->
-<!-- oligonucleotide indexes made up of bead-specific barcodes combined with unique molecular identifiers (UMIs) and oligo-dT tags  -->
-<!-- to prime polyadenylated RNA. Single cells of interest are combined with reagents in one channel of a microfluidic chip,  -->
-<!-- and gel beads in another, to form gel-beads in emulsion, or GEMs. Oligonucleotide indexes bind polyadenylated RNA within each GEM  -->
-<!-- reaction vesicle before gel beads are dissolved releasing the bound oligos into solution for reverse transcription.  -->
-<!-- By design, each resulting cDNA molecule contains a UMI and a GEM-specific barcode that, ideally, -->
-<!-- tags mRNA from an individual cell, but this is often not the case in practice.  To distinguish true cells from background barcodes in -->
-<!-- droplet-based single cell RNA-seq experiments, we introduce **CB2** and `scCB2`, its corresponding R package. -->
+Spatial transcriptomics is a powerful and widely-used experimental method for profiling genome-wide gene expression across a tissue, which has been named [Method of the Year 2020](https://www.nature.com/articles/s41592-020-01033-y) by Nature Methods. In 10x Visium (one of the most popular commercial protocol), fresh-frozen tissue is sectioned and placed onto a slide containing 4992 spots, with each spot containing millions of capture oligonucleotides with spatial barcodes unique to that spot. The tissue is imaged, typically via Hematoxylin and Eosin (H&E) staining. Following imaging, the tissue is permeabilized to release mRNA which binds to the capture oligonucleotides, generating a cDNA library consisting of transcripts bound by barcodes that preserve spatial information.  Data from a spatial transcriptomics experiment typically consists of the tissue image coupled with RNA-sequencing data collected from each spot. A first step in processing spatial transcriptomics data is tissue detection, where those spots on the slide containing tissue are distinguished from background spots without tissue. Unique molecular identifier (UMI) counts at each spot containing tissue are then used in downstream analyses
 
-<!-- **CB2** extends the EmptyDrops approach by introducing a clustering step that groups similar barcodes and  -->
-<!-- then conducts a statistical test to identify groups with expression distributions that vary from the background. -->
-<!-- While advantages are expected in many settings, users will benefit from  -->
-<!-- noting that **CB2** does not test for doublets or multiplets and, consequently, some of the high count identifications  -->
-<!-- may consist of two or more cells. Methods for identifying multiplets may prove useful after applying **CB2**.  -->
-<!-- It is also important to note that any method for distinguishing cells from background barcodes is technically correct in  -->
-<!-- identifying low-quality cells given that damaged cells exhibit expression profiles that differ from the background.  -->
-<!-- Specifically, mitochondrial gene expression is often high in damaged cells. -->
-<!-- Such cells are typically not of interest in downstream analysis and should therefore be removed.  -->
-<!-- The GetCellMat function in `scCB2` may be used toward this end. -->
+Ideally, a gene-specific UMI at a given spot would represent expression of that gene at that spot, and spots without tissue would show no (or few) UMIs. This is not the case in practice. Messenger RNA bleed from nearby spots causes substantial contamination of UMI counts, an artifact we refer to as spot swapping. On average, more than 30% observed expressions in a tissue spot are not originated from this spot, but from other spots contaminating it. Spot swapping confounds downstream inferences including normalization, marker gene-based annotation, differential expression and cell type decomposition.
+
+We developed **SpotClean** to adjust for the effects of spot swapping in 10x spatial transcriptomics experiments. SpotClean is able to measure the per-spot contamination rates in observed data and decontaminate gene expression levels, thus increases the sensitivity and precision of downstream analyses. Our package `SpotClean` provides functions to load raw spatial transcriptomics data from 10x Space Ranger outputs, decontaminate the spot swapping effect, estimate contamination levels, visualize expression profiles and spot labels on the slide, and connect with other widely-used package for further analyses.
+
 
 # Quick Start
 
@@ -55,123 +42,185 @@ BiocManager::install("SpotClean")
 
 ```
 
-Install via GitHub (https://github.com/zijianni/SpotClean) when not yet available on Bioconductor:
+Load package after installation:
 
-```{r, eval=FALSE}
-if(!require(devtools))
-    install.packages("devtools")
-if(!require(SpotClean))
-    devtools::install_github("zijianni/SpotClean", build_manual = TRUE, build_vignettes = TRUE)
+```{r}
+library(SpotClean)
 ```
 
 ## Short Demo
 
-Decontaminate the bundled example data
+Here we quickly demonstrate the general SpotClean workflow on the bundled example data. A step-by-step illustration can be found in the next section.
 
 ```{r, eval=FALSE}
-library(SpotClean)
+# Not run
+
+# Load example data
 data(mbrain_raw)
 data(mbrain_slide_info)
 
-# Load and visualize raw data
-mbrain_obj <- CreateSlide(count_mat = mbrain_raw, slide_info = mbrain_slide_info)
+# Visualize raw data
+mbrain_obj <- CreateSlide(count_mat = mbrain_raw, 
+                          slide_info = mbrain_slide_info)
 VisualizeSlide(slide_obj = mbrain_obj)
-VisualizeHeatmap(slide_obj = mbrain_obj,rownames(mbrain_raw)[1])
-
-# Measure contamination level
-ARCScore(count_mat = mbrain_raw, background_bcs = mbrain_slide_info$)
+VisualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
 
 # Decontaminate raw data
 decont_obj <- SpotClean(mbrain_obj)
 
-# Visualize decontamination
+# Visualize decontaminated gene
+VisualizeHeatmap(decont_obj,rownames(mbrain_raw)[1])
 
+# Visualize the estimated per-spot contamination rate
+VisualizeHeatmap(decont_obj,decont_obj@metadata$contamination_rate, 
+                 logged = FALSE, legend_title = "contamination rate",
+                 legend_range = c(0,1))
+
+# (Optionally) Transform to Seurat object for downstream analyses
+seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 ```
 
 ## Running Speed
 
-The computational speed is related to the size and structure of input datasets. SpotClean does not require parallel computation, thus does not eat too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.
+The computational speed is related to the size and structure of input datasets, mainly driven by the number of tissue spots. SpotClean does not require parallel computation, thus does not eat too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.
+
+## Situations you should think twice before applying SpotClean
+
+- Too many tissue spots. While the observed data is a single matrix with fixed number of columns (spots), the number of unknown parameters is proportional to the number of tissue spots. In the extreme case where all spots are covered by tissue, we have more unknown parameters than observed data values. In such case the contaminated expressions are confounded with true expressions, and SpotClean estimation becomes unreliable. We recommend that the input data has at least 25% spots not occupied by tissue, so that SpotClean has enough information from background spots to estimate contamination. 
+
+- Low-expressed genes. Low-expressed genes are usually of low interests and contain relatively more noises than true expression information. SpotClean by default only keeps high-expressed and high-variable genes for decontamination. It can be forced to run on manually-specified low-expressed genes, but usually does not change too much of their expressions.
+
+- Inference based on sequencing depth. The intuition of SpotClean is to move bled-out counts to where they came from. This will significantly change the estimated sequencing depth of tissue spots after decontamination, since most estimations of sequencing depth rely on total expressions in every spot. As a result, decontamination might conflict with some sequencing depth normalization methods.
+
+# Detailed Steps
+
+## Load count matrix and slide information from 10x Space Ranger output
+
+Currently, the most widely-used spatial protocol is 10x Visium. Our package provides functions to directly read 10x Space Ranger output files and generate a feature-by-barcode count matrix and slide information in R. Public 10x datasets can be found [here](https://support.10xgenomics.com/spatial-gene-expression/datasets/).
+
+Our package contains a small subset of 10x data corresponding to the top 100 highest expressed genes of [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). We now show how to process raw 10x Space Ranger output files to get this same example subset of data.
+
+First, download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz` and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot raw count matrix, and the latter contains slide information like slide images and spot IDs and positions.
+
+We can load these files using `Read10xRaw()` and `Read10xSlide()`, and check whether they are identical to the bundled example data:
+
+```{r, eval=F}
+# Not run
+
+raw_mat <- Read10xRaw(count_dir = "/path/to/raw_feature_bc_matrix/")
+slide_info <- Read10xSlide(tissue_csv_file="/path/to/tissue_positions_list.csv", 
+                           tissue_img_file="/path/to/tissue_lowres_image.png",
+                           scale_factor_file="/path/to/scalefactors_json.json")
+
+# Compare with bundled example data
+data(mbrain_raw)
+data(mbrain_slide_info)
+slide_info$slide$total_counts <- colSums(
+    raw_mat[rownames(mbrain_raw),mbrain_slide_info$slide$barcode]
+)
+
+identical(raw_mat[rownames(mbrain_raw),], mbrain_raw)
+identical(slide_info$slide, mbrain_slide_info$slide)
+```
+
+## Create the slide object
+
+In the following, we will show the `SpotClean` workflow using the bundled example data. 
+
+We combine count matrix and slide information together as one single slide object with class `SummarizedExperiment`:
+
+```{r}
+slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+slide_obj
+```
+
+## Visualize the slide object
+
+Our package provides multiple visualization functions in the 2-D slide space. Function `VisualizeSlide()` shows the input slide imaging file (if given) in R:
+
+```{r,fig.width=5, fig.height=5}
+VisualizeSlide(slide_obj)
+```
+
+Function `VisualizeLabel()` shows the spot labels. You can specify the column name of labels in the slide information, or manually provide a vector of characteristic labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been stored in the input slide information:
+
+```{r,fig.width=5, fig.height=4}
+VisualizeLabel(slide_obj,"tissue")
+```
 
 
+Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. For example, we can plot the total UMI counts in every spot, which again has been stored in the input slide information:
 
-<!-- # Detailed Steps -->
+```{r,fig.width=5, fig.height=4}
+VisualizeHeatmap(slide_obj,"total_counts")
+```
 
-<!-- ## Read count matrix from 10x output raw data -->
+Similar as `VisualizeLabel()`, You can also provide a certain gene name in raw count matrix to plot, or manually give a vector of values corresponding to each spot. For example, the expression of Mbp gene can be visualized:
 
-<!-- Currently, the most widely-used droplet-based protocol is 10x Chromium. Our package provides functions to directly read 10x Cell Ranger output files and generate a feature-by-barcode count matrix that may be read into R. Public 10x datasets can be found [here](https://www.10xgenomics.com/resources/datasets).  -->
+```{r,fig.width=5, fig.height=4}
+VisualizeHeatmap(slide_obj,"Mbp")
+```
+`VisualizeLabel()` and `VisualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `VisualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
 
-<!-- Our package contains a small subset of 10x data, `mbrainSub`, corresponding to the first 50,000 barcodes of [1k Brain Cells from an E18 Mouse](http://cf.10xgenomics.com/samples/cell-exp/2.1.0/neurons_900/neurons_900_raw_gene_bc_matrices.tar.gz). -->
+## Decontaminate the data
 
-<!-- We first generate 10x output files of `mbrainSub`, then read it using our built-in functions. -->
+`SpotClean()` is the main function for performing decontamination. It takes the slide object of raw data as input together with some parameters for controlling optimization and convergence, and returns a slide object with decontaminated gene expressions and other model-related parameters and statistics appending to the slide information. Detailed parameter explanations can be found by running `?SpotClean`. Here we set `maxit=10` and `candidate_radius=20` to save computation time. In practice, `SpotClean()` by default evaluates a series of candidate radius and automatically choose the best one. The default maximum number of iteration is 30, which can be extended if not converging.
 
-<!-- ```{r} -->
-<!-- library(scCB2) -->
-<!-- library(SummarizedExperiment) -->
+```{r}
+decont_obj <- SpotClean(slide_obj, maxit=10, candidate_radius = 20)
+```
 
-<!-- data(mbrainSub) -->
+Check the structure of output slide object:
 
-<!-- data.dir <- file.path(tempdir(),"CB2_example") -->
-<!-- DropletUtils::write10xCounts(data.dir, -->
-<!--                              mbrainSub, -->
-<!--                              version = "3") -->
+```{r}
+decont_obj
+names(decont_obj@metadata)
+```
 
-<!-- list.files(data.dir) -->
-<!-- ``` -->
+We can visualize the gene expressions after 10 iterations of decontamination:
 
-<!-- For Cell Ranger version <3, the raw data from 10x Cell Ranger output contains "barcodes.tsv", "genes.tsv" and "matrix.mtx". For Cell Ranger version >=3, the output files are "barcodes.tsv.gz", "features.tsv.gz" and "matrix.mtx.gz". We now read these files back into R and compare with original data matrix. -->
+```{r,fig.width=5, fig.height=4}
+VisualizeHeatmap(decont_obj,"Mbp")
+```
 
-<!-- ```{r} -->
-<!-- mbrainSub_2 <- Read10xRaw(data.dir) -->
-<!-- identical(mbrainSub, mbrainSub_2) -->
-<!-- ``` -->
+## Estimate contamination levels in observed data
 
-<!-- If raw data is not from the 10x Chromium pipeline, a user may manually create the feature-by-barcode count matrix with rows representing genes and columns representing barcodes. Gene and barcode IDs should be unique. The format of the count matrix can be either a sparse matrix or standard matrix. -->
+The metadata now contains more information including parameter estimations in the SpotClean model and measurements of contamination level. One important measurement people are interested in is the amount of contaminated expressions in observed expressions, i.e. expressions not originated from a tissue spot, but from other tissue spots due to spot swapping. Our model is able to estimate the proportion of contaminated expressions in each tissue spot:
 
-<!-- ## Run **CB2** to distinguish real cells from empty droplets -->
+```{r}
+summary(decont_obj@metadata$contamination_rate)
+```
 
-<!-- The main function `CB2FindCell` takes a raw count matrix as input and returns real cells, test statistics, and p-values. Now we apply `CB2FindCell` on `mbrainSub`, controlling FDR at 0.01 level (Default), assuming all barcodes with total count less than or equal to 100 are background empty droplets (Default), using 2 cores parallel computation (Default: number of total cores in the machine minus 2). For detailed information, see `?CB2FindCell`. -->
+This indicates around 30% expressions in observed data came from spot swapping contamination on average.
 
-<!-- ```{r} -->
-<!-- CBOut <- CB2FindCell(mbrainSub, Ncores = 2) -->
-<!-- str(assay(CBOut)) # cell matrix -->
-<!-- str(metadata(CBOut)) # test statistics, p-values, etc -->
-<!-- ``` -->
+## ARC score
 
-<!-- ## Extract real cell matrix -->
+We also provide another subjective estimation of contamination level, called the ambient RNA contamination (ARC) score. It can be calculated using function `ARCScore()`, and is also part of the decontamination outputs. Intuitively, the ARC score is a conserved lower bound of the proportion of contamination in observed tissue spots. The ARC score can also be applied in droplet-based single-cell data to estimate ambient RNA contamination when replacing background spots with empty droplets. Details can be found by running `?ARCScore`.
 
-<!-- If readers are not interested in the output testing information, `GetCellMat` can extract the real cell matrix directly from `CB2FindCell` output. It also provides a filtering option to remove broken cells based on the proportion of mitochondrial gene expressions. Now we apply `GetCellMat` on `CBOut`, filtering out cells whose mitochondrial proportions are greater than 0.25 (Default: 1, No filtering). -->
+```{r}
+ARCScore(slide_obj)
+```
 
-<!-- ```{r} -->
-<!-- RealCell <- GetCellMat(CBOut, MTfilter = 0.25) -->
-<!-- str(RealCell) -->
-<!-- ``` -->
+This indicates at least 5% expressions in observed data came from spot swapping contamination.
 
-<!-- ## Downstream analysis -->
+## Convert to Seurat object for downstream analyses
 
-<!-- After `CB2` pre-processing, the real cell matrix is still in matrix format, so it can be directly used in downstream statistical analyses. For example, if we want to use the *Seurat* pipeline, we can easily create a Seurat object using -->
+`Seurat` is one of the most widely-used package for downstream analyses of single-cell and spatial data. We provide function `ConvertToSeurat()` to convert our slide object to Seurat spatial object. Note that Seurat requires full input of the spatial folder. In the example above it will be the `spatial` folder.
 
-<!-- ```{r} -->
-<!-- SeuratObj <- Seurat::CreateSeuratObject(counts = RealCell,  -->
-<!--                                         project = "mbrain_example") -->
-<!-- SeuratObj -->
-<!-- ``` -->
+```{r, eval=F}
+# Not run
 
-<!-- ## All-in-one function -->
+seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
+```
 
-<!-- Under default parameters, we can directly use the all-in-one function `QuickCB2` to get the real cell matrix from 10x raw data.  -->
+# Session Information
 
-<!-- ```{r} -->
-<!-- RealCell_Quick <- QuickCB2(dir = data.dir, Ncores = 2) -->
-<!-- str(RealCell_Quick) -->
-<!-- ``` -->
+```{r}
+sessionInfo()
+```
 
-<!-- Now it's ready for downstream analysis such as normalization and clustering. Example Seurat tutorial: https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html -->
+# Citation
 
-<!-- # Session Information -->
-<!-- ```{r} -->
-<!-- sessionInfo() -->
-<!-- ``` -->
+We appreciate it if you could cite our work when using `SpotClean`:
 
-<!-- # Citation -->
-
-<!-- Ni, Z., Chen, S., Brown, J., & Kendziorski, C. (2020). CB2 improves power of cell detection in droplet-based single-cell RNA sequencing data. Genome Biology, 21(1), 137. https://doi.org/10.1186/s13059-020-02054-8 -->
+Ni, Z., Prasad, A., Chen, S., Arkin, L., Halberg, R., Drolet, B., Newton, M., Kendziorski, C. (2021). SpotClean adjusts for spot swapping in spatial transcriptomics data. xxx
