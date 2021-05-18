@@ -52,3 +52,9 @@ vignette("SpotClean")
 We appreciate it if you could cite our work when using `SpotClean`:
 
 Ni, Z., Prasad, A., Chen, S., Arkin, L., Halberg, R., Drolet, B., Newton, M., Kendziorski, C. (2021). SpotClean adjusts for spot swapping in spatial transcriptomics data. xxx
+
+A BibTeX entry for LaTeX users can be found by running 
+
+```{r}
+citation("SpotClean")
+```

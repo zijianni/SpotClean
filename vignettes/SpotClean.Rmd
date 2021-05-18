@@ -100,7 +100,7 @@ Currently, the most widely-used spatial protocol is 10x Visium. Our package prov
 
 Our package contains a small subset of 10x data corresponding to the top 100 highest expressed genes of [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). We now show how to process raw 10x Space Ranger output files to get this same example subset of data.
 
-First, download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz` and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot raw count matrix, and the latter contains slide information like slide images and spot IDs and positions.
+First, download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz` and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot count matrix, and the latter contains slide metadata like slide images and spot IDs and positions.
 
 We can load these files using `Read10xRaw()` and `Read10xSlide()`, and check whether they are identical to the bundled example data:
 
@@ -127,12 +127,17 @@ identical(slide_info$slide, mbrain_slide_info$slide)
 
 In the following, we will show the `SpotClean` workflow using the bundled example data. 
 
-We combine count matrix and slide information together as one single slide object with class `SummarizedExperiment`:
+We combine count matrix and slide metadata together as one single slide object with class `SummarizedExperiment`:
 
 ```{r}
+data(mbrain_raw)
+data(mbrain_slide_info)
+
 slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
 slide_obj
 ```
+
+As shown above, the raw count matrix is stored in the `raw` assay slot, and slide and image information are stored in `slide` and `grob` metadata slots. 
 
 ## Visualize the slide object
 
@@ -142,24 +147,25 @@ Our package provides multiple visualization functions in the 2-D slide space. Fu
 VisualizeSlide(slide_obj)
 ```
 
-Function `VisualizeLabel()` shows the spot labels. You can specify the column name of labels in the slide information, or manually provide a vector of characteristic labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been stored in the input slide information:
+Function `VisualizeLabel()` shows the spot labels. You can specify the column name of character labels in the `slide` metadata, or manually provide a vector of character labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeLabel(slide_obj,"tissue")
 ```
 
 
-Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. For example, we can plot the total UMI counts in every spot, which again has been stored in the input slide information:
+Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar as `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeHeatmap(slide_obj,"total_counts")
 ```
 
-Similar as `VisualizeLabel()`, You can also provide a certain gene name in raw count matrix to plot, or manually give a vector of values corresponding to each spot. For example, the expression of Mbp gene can be visualized:
+You can also provide a certain gene name appearing in the raw count matrix in input slide object to `VisualizeHeatmap()`. For example, the expression of Mbp gene can be visualized:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeHeatmap(slide_obj,"Mbp")
 ```
+
 `VisualizeLabel()` and `VisualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `VisualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
 
 ## Decontaminate the data
@@ -177,7 +183,9 @@ decont_obj
 names(decont_obj@metadata)
 ```
 
-We can visualize the gene expressions after 10 iterations of decontamination:
+The metadata now contains more information including parameter estimations in the SpotClean model and measurements of contamination levels. 
+
+We can visualize the Mbp gene expressions after 10 iterations of decontamination:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeHeatmap(decont_obj,"Mbp")
@@ -185,7 +193,7 @@ VisualizeHeatmap(decont_obj,"Mbp")
 
 ## Estimate contamination levels in observed data
 
-The metadata now contains more information including parameter estimations in the SpotClean model and measurements of contamination level. One important measurement people are interested in is the amount of contaminated expressions in observed expressions, i.e. expressions not originated from a tissue spot, but from other tissue spots due to spot swapping. Our model is able to estimate the proportion of contaminated expressions in each tissue spot:
+One important measurement people are interested in is the amount of contaminated expressions in observed expressions, i.e. expressions not originated from a tissue spot, but from other tissue spots due to spot swapping. Our model is able to estimate the proportion of contaminated expressions in each tissue spot:
 
 ```{r}
 summary(decont_obj@metadata$contamination_rate)
@@ -205,7 +213,7 @@ This indicates at least 5% expressions in observed data came from spot swapping 
 
 ## Convert to Seurat object for downstream analyses
 
-`Seurat` is one of the most widely-used package for downstream analyses of single-cell and spatial data. We provide function `ConvertToSeurat()` to convert our slide object to Seurat spatial object. Note that Seurat requires full input of the spatial folder. In the example above it will be the `spatial` folder.
+`Seurat` is one of the most widely-used package for downstream analyses of single-cell and spatial data. We provide function `ConvertToSeurat()` to convert our slide object to Seurat spatial object. Note that Seurat requires full input of the spatial folder, which will be the `spatial` folder in the example above.
 
 ```{r, eval=F}
 # Not run

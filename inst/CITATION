@@ -1,10 +1,20 @@
-bibentry(
-    bibtype = "Article",
-    title = "TBD",
-    author = c(
-        person("Zijian", "Ni"),
-        person("Christina", "Kendziorski")),
-    journal = "xx",
-    year = "xx",
-    doi = "xx"
+citHeader("To cite SpotClean in publications, please use:")
+
+citEntry(entry = "article",
+  author = personList(as.person("Zijian Ni"),
+                      as.person("Aman Prasad"),
+                      as.person("Shuyang Chen"),
+                      as.person("Lisa Arkin"),
+                      as.person("Richard Halberg"),
+                      as.person("Beth Drolet"),
+                      as.person("Michael Newton"),
+                      as.person("Christina Kendziorski")),
+  title = "SpotClean adjusts for spot swapping in spatial transcriptomics data",
+  journal = "xxx",
+  year = "2021",
+  volume = "xxx",
+  pages = "xxx",
+  doi = "xxx",
+  url = "xxx",
+  textVersion = "Ni et al. SpotClean adjusts for spot swapping in spatial transcriptomics data. xxx (2021)."
 )
