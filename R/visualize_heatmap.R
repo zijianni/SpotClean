@@ -198,7 +198,10 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
                              value>=min(legend_range),value<=max(legend_range))
         slide_hide <- filter(slide,
                              value<min(legend_range) | value>max(legend_range))
-        warning(nrow(slide_hide), " spots outside specified range.\n")
+        if(nrow(slide_hide)>0){
+            warning(nrow(slide_hide), " spots outside specified range.\n")
+        }
+
     }
 
     # plot
