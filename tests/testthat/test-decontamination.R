@@ -36,10 +36,17 @@ test_that("Internal computations", {
     small_mat <- matrix(1:4,2,2)
     small_edist <- .calculate_euclidean_weight(small_mat)
     small_gdist <- .gaussian_kernel(small_edist,10)
+    small_ldist <- .linear_kernel(small_edist,20)
+    small_lapdist <- .laplace_kernel(small_edist,30)
+    small_cdist <- .cauchy_kernel(small_edist,40)
 
     expect_equal(small_edist[1,2],sqrt(2))
     expect_equal(small_edist,t(small_edist))
-    expect_equal(small_gdist[1,2],0.9900498,tolerance = 4e-8)
+    expect_equal(small_gdist[1,2],0.99004984)
+    expect_equal(small_ldist[1,2],18.5857865)
+    expect_equal(small_lapdist[1,2],0.9539534)
+    expect_equal(small_cdist[1,2],0.99875156)
+
     expect_equal(.points_to_sdv(10,5), 25)
 
 })

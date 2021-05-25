@@ -26,6 +26,9 @@
 #' A series of radius to try when estimating contamination parameters.
 #' Default: {5, 10, 15, 20, 25, 30}
 #'
+#' @param kernel (chr): name of kernel to use to model local contamination.
+#' Supports "gaussian", "linear", "laplace", "cauchy". Default: "gaussian".
+#'
 #' @param verbose (logical) Whether print progress information.
 #' Default: \code{TRUE}
 #'
@@ -73,6 +76,7 @@
 SpotClean <- function(slide_obj, gene_keep=NULL,
                       maxit=30, tol=1,
                       candidate_radius=5*seq_len(6),
+                      kernel="gaussian",
                       verbose=TRUE){
 
     if(verbose){
@@ -147,8 +151,10 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
 
     for(i in seq_along(candidate_radius)){
 
-        slide_weight <- .gaussian_kernel(
-            slide_distance, .points_to_sdv(candidate_radius[i], spot_distance)
+        slide_weight <- .local_kernel(
+            slide_distance,
+            .points_to_sdv(candidate_radius[i], spot_distance),
+            kernel
         )
         W_y <- t(slide_weight[ts_idx,]/rowSums(slide_weight[ts_idx,]))
         W_yy <- unname(W_y[ts_idx,])
@@ -175,8 +181,9 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     cont_radius <- candidate_radius[best_radius]
 
     # contamination weight matrix
-    slide_weight <- .gaussian_kernel(slide_distance,
-                                     .points_to_sdv(cont_radius, spot_distance))
+    slide_weight <- .local_kernel(slide_distance,
+                                  .points_to_sdv(cont_radius, spot_distance),
+                                  kernel)
     slide_weight <- slide_weight[ts_idx,]/rowSums(slide_weight[ts_idx,])
     weight_mat <- distal_rate/n_spots+(1-distal_rate)*slide_weight
 
@@ -277,6 +284,50 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     #   (num) Gaussian distance
 
     exp(x^2/(-2*sigma^2))
+}
+
+.linear_kernel <- function(x, sigma){
+    # linear kernel
+    # Args:
+    #   x (num): euclidean distance
+    #   sigma (num): nonzero radius
+    # Returns:
+    #   (num) linear weights
+    abs(sigma-pmin(x,sigma))
+}
+
+.laplace_kernel <- function(x, sigma){
+    # Laplac kernel
+    # Args:
+    #   x (num): euclidean distance
+    #   sigma (num): bandwidth
+    # Returns:
+    #   (num) Laplace weights
+    exp(-abs(x)/sigma)
+}
+
+.cauchy_kernel <- function(x, sigma){
+    # Cauchy kernel
+    # Args:
+    #   x (num): euclidean distance
+    #   sigma (num): bandwidth
+    # Returns:
+    #   (num) Cauchy weights
+    1/(1+x^2/sigma^2)
+}
+
+.kernel_list <- list(gaussian=.gaussian_kernel,
+                     linear=.linear_kernel,
+                     laplace=.laplace_kernel,
+                     caucky=.cauchy_kernel)
+
+.local_kernel <- function(x, sigma, kernel){
+    if(kernel=="linear"){
+        # Linear kernel has different contamination radius
+        # calculation from Gaussian,etc.
+        sigma <- 2*sigma
+    }
+    .kernel_list[[kernel]](x,sigma)
 }
 
 .points_to_sdv <- function(cont_radius, d){
@@ -470,7 +521,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     stayed_counts <- decont_total_counts*(1-bleed_rate)+
         decont_total_counts*bleed_rate*
         diag(weight_mat[names(decont_total_counts),
-                              names(decont_total_counts)])
+                        names(decont_total_counts)])
 
     # fitted total expression = stayed + received
     fitted_total_counts <- decont_total_counts*(1-bleed_rate)+
