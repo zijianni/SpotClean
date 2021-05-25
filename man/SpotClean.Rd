@@ -10,6 +10,7 @@ SpotClean(
   maxit = 30,
   tol = 1,
   candidate_radius = 5 * seq_len(6),
+  kernel = "gaussian",
   verbose = TRUE
 )
 }
@@ -36,6 +37,9 @@ converged. Default: 1.}
 \item{candidate_radius}{(vector of num) Candidate contamination radius.
 A series of radius to try when estimating contamination parameters.
 Default: {5, 10, 15, 20, 25, 30}}
+
+\item{kernel}{(chr): name of kernel to use to model local contamination.
+Supports "gaussian", "linear", "laplace", "cauchy". Default: "gaussian".}
 
 \item{verbose}{(logical) Whether print progress information.
 Default: \code{TRUE}}
