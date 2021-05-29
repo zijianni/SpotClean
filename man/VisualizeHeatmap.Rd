@@ -46,7 +46,8 @@ matrix in the slide object.
 In the former case, the order of values in the
 vector should match the spot barcodes in the slide object.}
 
-\item{exp_matrix}{(matrix of num) When \code{value} is a single character
+\item{exp_matrix}{(matrix of num) When \code{object} is a data frame and
+\code{value} is a single character
 string, will search the matching gene in \code{exp_matrix} and plot the gene
 expression. Default: \code{NULL}.}
 
