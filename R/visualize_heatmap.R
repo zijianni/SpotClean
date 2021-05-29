@@ -186,9 +186,8 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
         legend_breaks <- floor(expm1( log1p(min(legend_range))+
                                           diff(log1p(legend_range))/4*0:4 ))
     }else{
-        legend_breaks <- floor(min(legend_range))+diff(legend_range)/4*0:4
+        legend_breaks <- floor(min(legend_range)+diff(legend_range)/4*0:4)
     }
-    legend_breaks <- round(legend_breaks,2)
 
     if(min(legend_range)==0){
         slide_show <- filter(slide,value>0)
