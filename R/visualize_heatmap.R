@@ -40,7 +40,8 @@ VisualizeHeatmap <- function(object, ...) {
 #' In the former case, the order of values in the
 #' vector should match the spot barcodes in the slide object.
 #'
-#' @param exp_matrix (matrix of num) When \code{value} is a single character
+#' @param exp_matrix (matrix of num) When \code{object} is a data frame and
+#' \code{value} is a single character
 #' string, will search the matching gene in \code{exp_matrix} and plot the gene
 #' expression. Default: \code{NULL}.
 #'
@@ -72,11 +73,11 @@ VisualizeHeatmap <- function(object, ...) {
 #' @export
 
 VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
-                             subset_barcodes=NULL,
-                             logged=TRUE, viridis=TRUE,
-                             legend_range=NULL,
-                             title="", legend_title=NULL,
-                             ...){
+                                     subset_barcodes=NULL,
+                                     logged=TRUE, viridis=TRUE,
+                                     legend_range=NULL,
+                                     title="", legend_title=NULL,
+                                     ...){
 
     if (!inherits(x = object, "data.frame")) {
         object <- as(object = object, Class = "data.frame")
@@ -84,11 +85,12 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 
     slide <- object
 
-    gp <- .visualize_heatmap(slide, value, exp_matrix,
-                             subset_barcodes,
-                             logged, viridis,
-                             legend_range,
-                             title, legend_title,
+    gp <- .visualize_heatmap(slide=slide, value=value,
+                             exp_mat=exp_matrix,
+                             subset_barcodes=subset_barcodes,
+                             logged=logged, viridis=viridis,
+                             legend_range=legend_range,
+                             title=title, legend_title=legend_title,
                              ...)
     return(gp)
 }
@@ -101,21 +103,21 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 #' @export
 #'
 VisualizeHeatmap.SummarizedExperiment <- function(object, value,
-                                     subset_barcodes=NULL,
-                                     logged=TRUE, viridis=TRUE,
-                                     legend_range=NULL,
-                                     title="", legend_title=NULL,
-                                     ...){
-
+                                                  subset_barcodes=NULL,
+                                                  logged=TRUE, viridis=TRUE,
+                                                  legend_range=NULL,
+                                                  title="", legend_title=NULL,
+                                                  ...){
     slide <- metadata(object)$slide
-    exp_matrix <- assay(object)
+    exp_mat <- assay(object)
 
-    gp <- .visualize_heatmap(slide, value, exp_matrix,
-                       subset_barcodes,
-                       logged, viridis,
-                       legend_range,
-                       title, legend_title,
-                       ...)
+    gp <- .visualize_heatmap(slide=slide, value=value,
+                             exp_mat=exp_mat,
+                             subset_barcodes=subset_barcodes,
+                             logged=logged, viridis=viridis,
+                             legend_range=legend_range,
+                             title=title, legend_title=legend_title,
+                             ...)
     return(gp)
 }
 
@@ -123,7 +125,7 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
 #' @import ggplot2
 #' @importFrom dplyr filter
 #'
-.visualize_heatmap <- function(slide, value, exp_matrix=NULL,
+.visualize_heatmap <- function(slide, value, exp_mat=NULL,
                                subset_barcodes=NULL,
                                logged=TRUE, viridis=TRUE,
                                legend_range=NULL,
@@ -131,7 +133,6 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
                                ...){
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- barcode <- NULL
-
 
     # manipulate value to plot
     if(length(value)==1 & is.character(value)){
@@ -144,23 +145,23 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
             slide$value <- slide[,value]
         }else{
             # value to plot is in given matrix
-            if(is.null(exp_matrix)){
+            if(is.null(exp_mat)){
                 stop("You must provide an input expression matrix to plot ",
                      value," expressions.")
             }
-            if(!value%in%rownames(exp_matrix)){
+            if(!value%in%rownames(exp_mat)){
                 stop("Specified gene does not exist in the expression matrix.")
             }
 
             # if expression matrix does not match slide info
-            shared_bcs <- intersect(colnames(exp_matrix), slide$barcode)
+            shared_bcs <- intersect(colnames(exp_mat), slide$barcode)
             if(length(shared_bcs)==0){
                 stop("Barcodes in input matrix do not ",
                      "match any barcodes in slide.")
             }
             missed_bcs <- setdiff(slide$barcode,shared_bcs)
 
-            value <- c(exp_matrix[value,shared_bcs],rep(NA, length(missed_bcs)))
+            value <- c(exp_mat[value,shared_bcs],rep(NA, length(missed_bcs)))
             names(value) <- c(shared_bcs, missed_bcs)
             slide$value <- value[slide$barcode]
         }
