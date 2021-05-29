@@ -90,6 +90,8 @@ The computational speed is related to the size and structure of input datasets, 
 
 - Low-expressed genes. Low-expressed genes are usually of low interests and contain relatively more noises than true expression information. SpotClean by default only keeps high-expressed and high-variable genes for decontamination. It can be forced to run on manually-specified low-expressed genes, but usually does not change too much of their expressions.
 
+The fundamental trouble is actually due to the high sparsity of low-expressed genes. However, we do not filter genes by sparsity because there can be interesting genes highly concentrated in a small tissue region, and SpotClean helps removing spot swapping in that region. When the input raw data is a count matrix, high sparsity is equivalent to low expression. When input is not a count matrix, users can either adjust the expression cutoffs or manually specify genes to decontaminate.
+
 - Inference based on sequencing depth. The intuition of SpotClean is to move bled-out counts to where they came from. This will significantly change the estimated sequencing depth of tissue spots after decontamination, since most estimations of sequencing depth rely on total expressions in every spot. As a result, decontamination might conflict with some sequencing depth normalization methods.
 
 # Detailed Steps
