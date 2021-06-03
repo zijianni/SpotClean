@@ -184,11 +184,15 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
                           max(slide$value, na.rm = TRUE))
     }
     if(logged){
-        legend_breaks <- floor(expm1( log1p(min(legend_range))+
-                                          diff(log1p(legend_range))/4*0:4 ))
+        legend_breaks <- expm1( log1p(min(legend_range))+
+                                          diff(log1p(legend_range))/4*0:4 )
+
     }else{
-        legend_breaks <- floor(min(legend_range)+diff(legend_range)/4*0:4)
+        legend_breaks <- min(legend_range)+diff(legend_range)/4*0:4
     }
+    legend_breaks[1:4] <- floor(legend_breaks[1:4])
+    legend_breaks[5] <- ceiling(legend_breaks[5])
+
 
     if(min(legend_range)==0){
         slide_show <- filter(slide,value>0)
