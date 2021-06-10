@@ -40,7 +40,7 @@ contribute too much to downstream analyses, but rather bring technical noise.
 It is always recommended to pre-filter gene expression matrix before
 any analyses.
 
-Variability is defined using coefficient of variation (CV). We apply the
+We apply the
 function \code{FindVariableFeatures} with \code{selection.method = "mvp"}
 from package \code{Seurat} on log transformed expression matrix to
 detect high variable genes. This method does not require a pre-specified
