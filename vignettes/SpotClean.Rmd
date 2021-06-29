@@ -21,11 +21,11 @@ set.seed(1)
 
 # Introduction
 
-Spatial transcriptomics is a powerful and widely-used experimental method for profiling genome-wide gene expression across a tissue, which has been named [Method of the Year 2020](https://www.nature.com/articles/s41592-020-01033-y) by Nature Methods. In 10x Visium, currently the most widely used commercial protocol, fresh-frozen tissue is sectioned and placed onto a slide containing 4992 spots, with each spot containing millions of capture oligonucleotides with spatial barcodes unique to that spot. The tissue is imaged, typically via Hematoxylin and Eosin (H&E) staining. Following imaging, the tissue is permeabilized to release mRNA which binds to the capture oligonucleotides, generating a cDNA library consisting of transcripts bound by barcodes that preserve spatial information.  Data from a spatial transcriptomics experiment typically consists of the tissue image coupled with RNA-sequencing data collected from each spot. A first step in processing spatial transcriptomics data is tissue detection, where those spots on the slide containing tissue are distinguished from background spots without tissue. Unique molecular identifier (UMI) counts at each spot containing tissue are then used in downstream analyses
+Spatial transcriptomics (ST), named [Method of the Year 2020](https://www.nature.com/articles/s41592-020-01033-y) by *Nature Methods* in 2020, is a powerful and widely-used experimental method for profiling genome-wide gene expression across a tissue. In a typical ST experiment, fresh-frozen (or FFPE) tissue is sectioned and placed onto a slide containing spots, with each spot containing millions of capture oligonucleotides with spatial barcodes unique to that spot. The tissue is imaged, typically via Hematoxylin and Eosin (H&E) staining. Following imaging, the tissue is permeabilized to release mRNA which then binds to the capture oligonucleotides, generating a cDNA library consisting of transcripts bound by barcodes that preserve spatial information. Data from an ST experiment consists of the tissue image coupled with RNA-sequencing data collected from each spot. A first step in processing ST data is tissue detection, where spots on the slide containing tissue are distinguished from background spots without tissue. Unique molecular identifier (UMI) counts at each spot containing tissue are then used in downstream analyses.
 
-Ideally, a gene-specific UMI at a given spot would represent expression of that gene at that spot, and spots without tissue would show no (or few) UMIs. This is not the case in practice. Messenger RNA bleed from nearby spots causes substantial contamination of UMI counts, an artifact we refer to as spot swapping. On average, more than 30% observed expressions in a tissue spot are not originated from this spot, but from other spots contaminating it. Spot swapping confounds downstream inferences including normalization, marker gene-based annotation, differential expression and cell type decomposition.
+Ideally, a gene-specific UMI at a given spot would represent expression of that gene at that spot, and spots without tissue would show no (or few) UMIs. This is not the case in practice. Messenger RNA bleed from nearby spots causes substantial contamination of UMI counts, an artifact we refer to as spot swapping. On average, we observe that more than 30% of UMIs at a tissue spot did not originate from this spot, but from other spots contaminating it. Spot swapping confounds downstream inferences including normalization, marker gene-based annotation, differential expression and cell type decomposition.
 
-We developed **SpotClean** to adjust for the effects of spot swapping in 10x spatial transcriptomics experiments. SpotClean is able to measure the per-spot contamination rates in observed data and decontaminate gene expression levels, thus increases the sensitivity and precision of downstream analyses. Our package `SpotClean` provides functions to load raw spatial transcriptomics data from 10x Space Ranger outputs, decontaminate the spot swapping effect, estimate contamination levels, visualize expression profiles and spot labels on the slide, and connect with other widely-used package for further analyses.
+We developed **SpotClean** to adjust for the effects of spot swapping in ST experiments. SpotClean is able to measure the per-spot contamination rates in observed data and decontaminate gene expression levels, thus increases the sensitivity and precision of downstream analyses. Our package `SpotClean` is built based on 10x Visium spatial transcriptomics experiments, currently the most widely-used commercial protocol, providing functions to load raw spatial transcriptomics data from 10x Space Ranger outputs, decontaminate the spot swapping effect, estimate contamination levels, visualize expression profiles and spot labels on the slide, and connect with other widely-used packages for further analyses. SpotClean can be potentially extended to other spatial transcriptomics data as long as the gene expression data in both tissue and background regions are available.
 
 
 # Quick Start
@@ -82,23 +82,23 @@ seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 
 ## Running Speed
 
-The computational speed is related to the size and structure of input datasets, mainly driven by the number of tissue spots. SpotClean does not require parallel computation, thus does not eat too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.
+The computational speed is related to the size and structure of input datasets, mainly driven by the number of tissue spots. SpotClean does not require parallel computation, and thus does not use up too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.
 
-## Situations you should think twice before applying SpotClean
+## Situations you should think twice about before applying SpotClean
 
-- **Too many tissue spots**. While the observed data is a single matrix with fixed number of columns (spots), the number of unknown parameters is proportional to the number of tissue spots. In the extreme case where all spots are covered by tissue, we have more unknown parameters than observed data values. In such case the contaminated expressions are confounded with true expressions, and SpotClean estimation becomes unreliable. We recommend that the input data has at least 25% spots not occupied by tissue, so that SpotClean has enough information from background spots to estimate contamination. 
+- **Too many tissue spots (not enough background spots)** While the observed data is a single matrix with a fixed number of columns (spots), the number of unknown parameters is proportional to the number of tissue spots. In the extreme case where all spots are covered by tissue, we have more unknown parameters than observed data values. In this case the contaminated expressions are confounded with true expressions, and SpotClean estimation becomes unreliable. We recommend that the input data have at least 25% spots not occupied by tissue, so that SpotClean has enough information from background spots to estimate contamination.
 
-- **Low-expressed genes**. Low-expressed genes are usually of low interests and contain relatively more noises than true expression information. SpotClean by default only keeps high-expressed and high-variable genes for decontamination. It can be forced to run on manually-specified low-expressed genes, but usually does not change too much of their expressions. The fundamental trouble is actually due to the high sparsity of low-expressed genes. However, we do not filter genes by sparsity because there can be interesting genes highly concentrated in a small tissue region, and SpotClean helps removing spot swapping in that region. When the input raw data is a count matrix, high sparsity is equivalent to low expression. When input is not a count matrix, users can either adjust the expression cutoffs or manually specify genes to decontaminate.
+- **Lowly-expressed genes** Lowly-expressed genes typically contain relatively less information and relatively more noise than highly-expressed genes. SpotClean by default only keeps highly-expressed and highly-variable genes for decontamination. It can be forced to run on manually-specified lowly-expressed genes. However, even in this case, expression for the lowly-expressed genes is typically not changed very much. Given the high sparsity in most lowly expressed genes, there is not enough information available to confidently reassign UMIs in most cases. However, we do not filter genes by sparsity because there can be interesting genes highly concentrated in a small tissue region. In cases like this, SpotClean is effective at adjusting for spot swapping in these regions.  If the defaults are not appropriate, users can either adjust the expression cutoffs or manually specify genes to decontaminate.
 
-- **Inference based on sequencing depth**. The intuition of SpotClean is to move bled-out counts to where they came from. This will significantly change the estimated sequencing depth of tissue spots after decontamination, since most estimations of sequencing depth rely on total expressions in every spot. As a result, decontamination might conflict with some sequencing depth normalization methods.
+- **Inference based on sequencing depth** SpotClean reassigns bled-out UMIs to their tissue spots of origin which changes the estimated sequencing depth of tissue spots after decontamination, since most estimations of sequencing depth rely on total expressions at every spot. As a result, decontamination might conflict with some sequencing depth normalization methods (XX what??XX).
 
 # Detailed Steps
 
 ## Load count matrix and slide information from 10x Space Ranger output
 
-Currently, the most widely-used spatial protocol is 10x Visium. Our package provides functions to directly read 10x Space Ranger output files and generate a feature-by-barcode count matrix and slide information in R. Public 10x datasets can be found [here](https://support.10xgenomics.com/spatial-gene-expression/datasets/).
+Currently, the most widely-used spatial transcriptomics protocol is 10x Visium. `SpotClean` provides functions to directly read 10x Space Ranger output files and generate a feature-by-barcode count matrix and slide information in R. Public 10x datasets can be found [here](https://support.10xgenomics.com/spatial-gene-expression/datasets/).
 
-Our package contains a small subset of 10x data corresponding to the top 100 highest expressed genes of [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). We now show how to process raw 10x Space Ranger output files to get this same example subset of data.
+`SpotClean` contains a small subset of 10x data corresponding to the top 100 highest expressed genes of [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). Below we show how to process raw 10x Space Ranger output files to get this same example subset of data.
 
 First, download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz` and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot count matrix, and the latter contains slide metadata like slide images and spot IDs and positions.
 
@@ -154,23 +154,23 @@ VisualizeLabel(slide_obj,"tissue")
 ```
 
 
-Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar as `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
+Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeHeatmap(slide_obj,"total_counts")
 ```
 
-You can also provide a certain gene name appearing in the raw count matrix in input slide object to `VisualizeHeatmap()`. For example, the expression of Mbp gene can be visualized:
+You can also provide a certain gene name appearing in the raw count matrix in input slide object to `VisualizeHeatmap()`. For example, the expression of the Mbp gene can be visualized:
 
 ```{r,fig.width=5, fig.height=4}
 VisualizeHeatmap(slide_obj,"Mbp")
 ```
 
-`VisualizeLabel()` and `VisualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `VisualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
+`VisualizeLabel()` and `VisualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `VisualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log-scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
 
 ## Decontaminate the data
 
-`SpotClean()` is the main function for performing decontamination. It takes the slide object of raw data as input together with some parameters for controlling optimization and convergence, and returns a slide object with decontaminated gene expressions and other model-related parameters and statistics appending to the slide information. Detailed parameter explanations can be found by running `?SpotClean`. Here we set `maxit=10` and `candidate_radius=20` to save computation time. In practice, `SpotClean()` by default evaluates a series of candidate radius and automatically choose the best one. The default maximum number of iteration is 30, which can be extended if not converging.
+`SpotClean()` is the main function for performing decontamination. It takes the slide object of raw data as input together with some parameters for controlling optimization and convergence, and returns a slide object with decontaminated gene expressions and other model-related parameters and statistics appending to the slide information. Detailed parameter explanations can be found by running `?SpotClean`. Here we set `maxit=10` and `candidate_radius=20` to save computation time. In practice, `SpotClean()` by default evaluates a series of candidate radii and automatically chooses the best one. The default maximum number of iterations is 30, which can be extended if convergence has not been reached.
 
 ```{r}
 decont_obj <- SpotClean(slide_obj, maxit=10, candidate_radius = 20)
@@ -183,7 +183,7 @@ decont_obj
 names(decont_obj@metadata)
 ```
 
-The metadata now contains more information including parameter estimations in the SpotClean model and measurements of contamination levels. 
+The metadata now contains more information including parameter estimates from the SpotClean model and measurements of contamination levels. 
 
 We can visualize the Mbp gene expressions after 10 iterations of decontamination:
 
@@ -193,13 +193,13 @@ VisualizeHeatmap(decont_obj,"Mbp")
 
 ## Estimate contamination levels in observed data
 
-One important measurement people are interested in is the amount of contaminated expressions in observed expressions, i.e. expressions not originated from a tissue spot, but from other tissue spots due to spot swapping. Our model is able to estimate the proportion of contaminated expressions in each tissue spot:
+Our model is able to estimate the proportion of contaminated expression at each tissue spot (i.e. expression at a tissue spot that orginated from a different spot due to spot swapping):
 
 ```{r}
 summary(decont_obj@metadata$contamination_rate)
 ```
 
-This indicates around 30% expressions of a tissue spot in observed data came from spot swapping contamination, averaging across all tissue spots.
+This indicates around 30% of UMIs at a tissue spot in the observed data came from spot swapping contamination, averaging across all tissue spots.
 
 ## ARC score
 
@@ -213,7 +213,7 @@ This indicates at least 5% expressions in observed data came from spot swapping 
 
 ## Convert to Seurat object for downstream analyses
 
-`Seurat` is one of the most widely-used package for downstream analyses of single-cell and spatial data. We provide function `ConvertToSeurat()` to convert our slide object to Seurat spatial object. Note that Seurat requires full input of the spatial folder, which will be the `spatial` folder in the example above.
+`ConvertToSeurat()` can be used to convert our slide object to a Seurat spatial object. Note that Seurat requires full input of the spatial folder. In the above example, this is the `spatial` folder.
 
 ```{r, eval=F}
 # Not run
@@ -229,6 +229,6 @@ sessionInfo()
 
 # Citation
 
-We appreciate it if you could cite our work when using `SpotClean`:
+`SpotClean` can be cited at:
 
-Ni, Z., Prasad, A., Chen, S., Arkin, L., Halberg, R., Drolet, B., Newton, M., Kendziorski, C. (2021). SpotClean adjusts for spot swapping in spatial transcriptomics data. xxx
+Ni, Z., Prasad, A., Chen, S., Arkin, L., Halberg, R., Drolet, B., Newton, M., Kendziorski, C. (2021). SpotClean adjusts for spot swapping in spatial transcriptomics data. *bioRxiv*. https://doi.org/10.1101/2021.06.11.448105
