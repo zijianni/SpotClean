@@ -18,7 +18,7 @@ test_that("Object class", {
 })
 
 test_that("Gene filtering", {
-    expect_true(nrow(slide_obj)==11)
+    expect_true(nrow(slide_obj)==14)
 })
 
 test_that("input data frame",{

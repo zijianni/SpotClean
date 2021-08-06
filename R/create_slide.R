@@ -15,7 +15,7 @@
 #' like barcode, tissue, imagerow, imagecol, etc.
 #'
 #' @param gene_cutoff (num) Filter out genes with average expressions
-#' among all spots below or equal to this cutoff.
+#' among tissue spots below or equal to this cutoff.
 #' Default: 0.1.
 #'
 #' @param verbose (logical) Whether print progress information.
@@ -57,10 +57,11 @@ CreateSlide <- function(count_mat, slide_info, gene_cutoff=0.1, verbose=TRUE){
 
     # rearrange barcodes
     count_mat <- count_mat[,slide_info$slide$barcode]
+    count_ts_mat <- count_mat[,slide_info$slide$tissue==1]
 
     # filter genes
     gene_cutoff <- max(gene_cutoff,0)
-    good_gene <- rowMeans(count_mat)>gene_cutoff
+    good_gene <- rowMeans(count_ts_mat)>gene_cutoff
 
     if(verbose){
         message("Filtered out ",sum(!good_gene)

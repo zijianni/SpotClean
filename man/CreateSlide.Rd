@@ -15,7 +15,7 @@ Can be either standard matrix format or sparse matrix format.}
 like barcode, tissue, imagerow, imagecol, etc.}
 
 \item{gene_cutoff}{(num) Filter out genes with average expressions
-among all spots below or equal to this cutoff.
+among tissue spots below or equal to this cutoff.
 Default: 0.1.}
 
 \item{verbose}{(logical) Whether print progress information.
