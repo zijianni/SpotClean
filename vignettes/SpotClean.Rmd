@@ -92,6 +92,14 @@ The computational speed is related to the size and structure of input datasets, 
 
 - **Inference based on sequencing depth** SpotClean reassigns bled-out UMIs to their tissue spots of origin which changes the estimated sequencing depth of tissue spots after decontamination, since most estimations of sequencing depth rely on total expressions at every spot. As a result, decontamination can be considered as another type of normalization and might conflict with existing sequencing depth normalization methods.
 
+## Recommended applications
+
+Given the fact that spot swapping happens ubiquitously for all genes across the whole slide, SpotClean has the potential to improve the accuracy of any marker gene-based inferences including tissue type annotation, cell type decomposition, integration with single-cell RNA-seq data, and their downstream analyses. SpotClean also improves the identification of spatially variable genes since it enhances the signals of high-expressed regions. 
+
+SpotClean improves the identification of differentially expressed genes between two groups of spots by enhancing the fold change. The p-value, however, sometimes is not improved due to the increased variability within the spot groups.
+
+For clustering analyses, SpotClean didn't show significant improvement since the cluster signals are already strong enough in raw data.
+
 # Detailed Steps
 
 ## Load count matrix and slide information from 10x Space Ranger output
