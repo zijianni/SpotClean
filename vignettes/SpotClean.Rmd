@@ -94,11 +94,9 @@ The computational speed is related to the size and structure of input datasets, 
 
 ## Recommended applications
 
-Given the fact that spot swapping happens ubiquitously for all genes across the whole slide, SpotClean has the potential to improve the accuracy of any marker gene-based inferences including tissue type annotation, cell type decomposition, integration with single-cell RNA-seq data, and their downstream analyses. SpotClean also improves the identification of spatially variable genes since it enhances the signals of high-expressed regions. 
-
-SpotClean improves the identification of differentially expressed genes between two groups of spots by enhancing the fold change. The p-value, however, sometimes is not improved due to the increased variability within the spot groups.
-
-For clustering analyses, SpotClean didn't show significant improvement since the cluster signals are already strong enough in raw data.
+SpotClean leads to improved estimates of expression by correcting for spot swapping. In other words, SpotClean reduces noise by enhancing signal in highly expressed regions and reducing measured signal in unexpressed regions. Consequently, SpotClean will improve the accuracy of marker gene-based inferences including tissue type annotation, cell type decomposition, integration with single-cell RNA-seq data, and associated downstream analyses.  SpotClean also improves the identification of spatially variable and differentially expressed (DE) genes.  We note that in some cases, the p-values associated with known DE genes may increase slightly following SpotClean due to increased variability within the spot groups (i.e. truly expressed regions become more highly expressed; and signal is removed from unexpressed regions).
+ 
+SpotClean will not alter clusters substantially in most datasets given that clusters are largely determined by relatively few highly expressed genes. While clusters may become slightly better defined, in most cases we do not see differences in the number of clusters and/or relationships among clusters after applying SpotClean.
 
 # Detailed Steps
 
