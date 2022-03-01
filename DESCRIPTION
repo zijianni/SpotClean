@@ -1,6 +1,6 @@
 Package: SpotClean
-Version: 0.99.1
-Date: 2021/8/6
+Version: 0.99.2
+Date: 2022/2/28
 Title: SpotClean adjusts for spot swapping in spatial transcriptomics data
 Authors@R: c(
     person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
@@ -52,7 +52,7 @@ NeedsCompilation: yes
 VignetteBuilder: knitr
 Encoding: UTF-8
 SystemRequirements: C++11
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 LazyData: true
 URL: https://github.com/zijianni/SpotClean
 BugReports: https://github.com/zijianni/SpotClean/issues

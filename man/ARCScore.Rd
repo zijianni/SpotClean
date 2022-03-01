@@ -30,17 +30,27 @@ containing cells.}
 }
 \description{
 The ARC score is intended for subjectively measuring the level
-of contamination caused by ambient RNAs for a given sptial transcriptomics
+of contamination caused by ambient RNAs for a given spatial transcriptomics
 or droplet-based single-cell RNA-seq data. Intuitively, this score is a lower
 bound of the average proportion of contaminated expressions in tissue
-spots or cell droplets.
+spots or cell droplets in the observed contaminated data.
+
+ARC score is calculated as follows: (1) estimate the average amount of
+contaminated UMI counts received per spot (droplet) using the total UMI
+counts in background spots (empty droplets) divided by total number of
+spots (droplets). This is an underestimation as it does not account for
+contamination inside tissue spots or cell droplets. (2) estimate the average
+amount of observed UMI counts per tissue spot (cell droplet) using the
+total UMI counts in tissue spots (cell droplets) divided by number of
+tissue spots (cell droplets). (3) Divide the value in (1) by the value in
+(2) to get the ARC score.
 
 This lower bound is very conservative as it only
-accounts for contamination in background spots or empty droplets, neglecting
-contamination in tissue spots or cell droplets. However, it is totally
-subjective, not relying on any complicated assumptions and modelling.
-ARC score serves as a relative contamination measurement for comparison
-among different datasets and protocols.
+accounts for observable contamination in background spots or empty droplets,
+neglecting contamination in tissue spots or cell droplets. However, it
+is totally subjective, not relying on any complicated assumptions and
+modelling. ARC score serves as a relative contamination measurement for
+comparison among different datasets and protocols.
 }
 \examples{
 
