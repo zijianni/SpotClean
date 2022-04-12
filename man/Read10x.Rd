@@ -13,7 +13,8 @@ Read10xRawH5(h5_file, row_name = "symbol", meta = FALSE)
 Read10xSlide(tissue_csv_file, tissue_img_file = NULL, scale_factor_file = NULL)
 }
 \arguments{
-\item{count_dir}{(chr) The directory of 10x output matrix data. The directory should include
+\item{count_dir}{(chr) The directory of 10x output matrix data.
+The directory should include
 three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 
 \item{row_name}{(chr) Specify either using gene symbols
@@ -21,17 +22,18 @@ three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 as row names of the count matrix.
 Default: \code{row_name = "symbol"}.}
 
-\item{meta}{(logical) If \code{TRUE}, \code{Read10xRaw} or \code{Read10xRawH5}
-returns a list containing both the
+\item{meta}{(logical) If \code{TRUE}, \code{Read10xRaw} or
+\code{Read10xRawH5} returns a list containing both the
 count matrix and metadata of genes (features). Metadata includes feature
 names, IDs and other additional information depending on Space Ranger
 output. If \code{FALSE}, only returns the count matrix.
 Default: \code{FALSE}.}
 
-\item{h5_file}{(chr) The path of 10x output matrix HDF5 file (ended with .h5).}
+\item{h5_file}{(chr) The path of 10x output matrix HDF5 file
+(ended with .h5).}
 
-\item{tissue_csv_file}{(chr) The path of 10x output CSV file of spot positions,
-usually named \code{tissue_positions_list.csv}.}
+\item{tissue_csv_file}{(chr) The path of 10x output CSV file of
+spot positions, usually named \code{tissue_positions_list.csv}.}
 
 \item{tissue_img_file}{(chr) The path of the 10x output low resolution
 tissue image in PNG format,

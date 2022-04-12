@@ -191,7 +191,7 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
     }
     legend_breaks[c(1,5)] <- legend_range
     if(diff(legend_range)>10){
-        legend_breaks[1:4] <- ceiling(legend_breaks[1:4])
+        legend_breaks[seq_len(4)] <- ceiling(legend_breaks[seq_len(4)])
         legend_breaks[5] <- floor(legend_breaks[5])
     }
 

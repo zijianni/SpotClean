@@ -14,8 +14,8 @@ An object of class \code{"dgCMatrix"}.
 data(mbrain_raw)
 }
 \description{
-This dataset contains one sparse count matrix \code{mbrain_raw} of
-gene expressions. The original dataset can be found at
+This dataset contains one sparse count matrix
+\code{mbrain_raw} of gene expressions. The original dataset can be found at
 https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain.
 For simplicity, we only keep the top 100 highest expressed genes in this
 example data.

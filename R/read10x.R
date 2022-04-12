@@ -15,13 +15,15 @@
 #' analysis pipeline
 #' https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/rkit.
 #'
-#' @param count_dir (chr) The directory of 10x output matrix data. The directory should include
+#' @param count_dir (chr) The directory of 10x output matrix data.
+#' The directory should include
 #' three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.
 #'
-#' @param h5_file (chr) The path of 10x output matrix HDF5 file (ended with .h5).
+#' @param h5_file (chr) The path of 10x output matrix HDF5 file
+#' (ended with .h5).
 #'
-#' @param tissue_csv_file (chr) The path of 10x output CSV file of spot positions,
-#' usually named \code{tissue_positions_list.csv}.
+#' @param tissue_csv_file (chr) The path of 10x output CSV file of
+#' spot positions, usually named \code{tissue_positions_list.csv}.
 #'
 #' @param tissue_img_file (chr) The path of the 10x output low resolution
 #' tissue image in PNG format,
@@ -41,8 +43,8 @@
 #' as row names of the count matrix.
 #' Default: \code{row_name = "symbol"}.
 #'
-#' @param meta (logical) If \code{TRUE}, \code{Read10xRaw} or \code{Read10xRawH5}
-#' returns a list containing both the
+#' @param meta (logical) If \code{TRUE}, \code{Read10xRaw} or
+#' \code{Read10xRawH5} returns a list containing both the
 #' count matrix and metadata of genes (features). Metadata includes feature
 #' names, IDs and other additional information depending on Space Ranger
 #' output. If \code{FALSE}, only returns the count matrix.
