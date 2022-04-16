@@ -1,14 +1,19 @@
 data(mbrain_raw)
 data(mbrain_slide_info)
 
+
 test_that("Barcodes not matching", {
     expect_error(CreateSlide(mbrain_raw[,1:10], mbrain_slide_info),
                  "Barcodes in count matrix do not match")
 })
 
 test_that("Rearrange barcode order", {
-    expect_identical(CreateSlide(mbrain_raw[,sample(colnames(mbrain_raw))], mbrain_slide_info),
-                     CreateSlide(mbrain_raw, mbrain_slide_info))
+    slide <- mbrain_slide_info$slide
+    mbrain_slide_info_2 <- mbrain_slide_info
+    mbrain_slide_info_2$slide <- slide[sample(nrow(slide)),]
+
+    expect_identical(CreateSlide(mbrain_raw, mbrain_slide_info),
+                     CreateSlide(mbrain_raw, mbrain_slide_info_2))
 })
 
 slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info, gene_cutoff = 100)
