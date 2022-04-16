@@ -4,8 +4,56 @@
 #' for decontaminating spot swapping effect in spatial transcriptomics data.
 #'
 #' @param slide_obj A slide object created or inherited from
-#' \code{CreateSlide()}.
+#' \code{CreateSlide()}, or a \code{SpatialExperiment} object created from
+#' \code{SpatialExperiment::read10xVisium()}.
 #'
+#' @param ... Arguments passed to other methods
+#'
+#'
+#' @return For slide object created from \code{CreateSlide()}, returns a
+#' slide object where the decontaminated expression matrix is in the
+#' "decont" assay slot and the contamination statistics are in
+#' metadata slots. Contamination statistics include ambient RNA contamination
+#' (ARC) score, bleeeding rate, distal rate, contamination radius,
+#' contamination kernel weight matrix, log-likelihood value in each iteration,
+#' estimated proportion of contamination in each tissue spot in observed data.
+#' Since decontaminated and raw data have different number of columns, they can
+#' not be stored in a single object.
+#'
+#' For \code{SpatialExperiment} object created from
+#' \code{SpatialExperiment::read10xVisium()}, returns a
+#' \code{SpatialExperiment} object where the decontaminated expression matrix
+#' is in the "decont" assay slot and the contamination statistics are in
+#' metadata slots. Raw expression matrix is also stored in the "counts" assay
+#' slot. Genes are filtered based on \code{gene_cutoff}.
+#'
+#' @details Briefly, the contamination level for the slide is estimated based on
+#' the total counts of all spots. UMI counts travelling around the slide are
+#' assumed to follow Poisson distributions and modeled by a mixture of
+#' Gaussian (proximal) and uniform (distal) kernels. The underlying
+#' uncontaminated gene expressions are estimated by EM algorithm to
+#' maximize the data likelihood. Detailed derivation can be found in our
+#' manuscript.
+#'
+#'
+#' @examples
+#'
+#' data(mbrain_raw)
+#' data(mbrain_slide_info)
+#' mbrain_obj <- CreateSlide(mbrain_raw,
+#'                           mbrain_slide_info)
+#' mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
+#' mbrain_decont_obj
+
+
+#' @rdname SpotClean
+#'
+#' @export
+
+SpotClean <- function(slide_obj, ...) {
+    UseMethod(generic = "SpotClean", object = slide_obj)
+}
+
 #' @param gene_keep (vector of chr) Gene names to keep for decontamination.
 #' We recommend not decontaminating lowly expressed and lowly variable genes
 #' in order to save computation time. Even if user include them, their
@@ -31,53 +79,114 @@
 #'
 #' @param verbose (logical) Whether print progress information.
 #' Default: \code{TRUE}
-#'
-#' @return A slide object where the decontaminated expression matrix is in the
-#' "decont" assay slot and the contamination statistics are in
-#' metadata slots. Contamination statistics include ambient RNA contamination
-#' (ARC) score, bleeeding rate, distal rate, contamination radius,
-#' contamination kernel weight matrix, log-likelihood value in each iteration,
-#' estimated proportion of contamination in each tissue spot in observed data.
-#' Since decontaminated and raw data have different columns, they can
-#' not be stored in a single SummarizedExperiment object.
-#' Do not overwrite the raw slide object.
-#'
-#' @details Briefly, the contamination level for the slide is estimated based on
-#' the total counts of all spots. UMI counts travelling around the slide are
-#' assumed to follow Poisson distributions and modeled by a mixture of
-#' Gaussian (proximal) and uniform (distal) kernels. The underlying
-#' uncontaminated gene expressions are estimated by EM algorithm to
-#' maximize the data likelihood. Detailed derivation can be found in our
-#' manuscript.
-#'
-#'
-#' @examples
-#'
-#' data(mbrain_raw)
-#' data(mbrain_slide_info)
-#' mbrain_obj <- CreateSlide(mbrain_raw,
-#'                           mbrain_slide_info)
-#' mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
-#' mbrain_decont_obj
-
-
-
 
 #' @import Matrix
-#' @importFrom SummarizedExperiment assays SummarizedExperiment
-#' @importMethodsFrom S4Vectors metadata
+#' @importFrom SummarizedExperiment assays SummarizedExperiment assays<-
+#' @importMethodsFrom S4Vectors metadata metadata<-
 #' @importFrom utils txtProgressBar setTxtProgressBar
-#' @importFrom dplyr filter select
+#' @importFrom dplyr filter select rename
 #' @importFrom stats dist quantile optim cor lm coef
 #' @importFrom methods as
+#' @importFrom SpatialExperiment spatialData scaleFactors spatialCoords
+#'
+#' @method SpotClean SummarizedExperiment
+#' @rdname SpotClean
 #'
 #' @export
 
-SpotClean <- function(slide_obj, gene_keep=NULL,
-                      maxit=30, tol=1,
-                      candidate_radius=5*seq_len(6),
-                      kernel="gaussian",
-                      verbose=TRUE){
+SpotClean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
+                                           maxit=30, tol=1,
+                                           candidate_radius=5*seq_len(6),
+                                           kernel="gaussian",
+                                           verbose=TRUE, ...){
+
+    raw_data <- assays(slide_obj)$raw  # raw data matrix
+    if(is.null(raw_data)){
+        stop("Cannot find raw data in input slide object.")
+    }
+    slide <- metadata(slide_obj)$slide  # slide info
+
+    # run SpotClean
+    res <- .SpotClean(raw_data=raw_data, slide=slide,
+                      gene_keep=gene_keep,
+                      maxit=maxit, tol=tol,
+                      candidate_radius=candidate_radius,
+                      kernel=kernel,
+                      verbose=verbose)
+
+    # create output
+    metadata(slide_obj)$slide <- slide[slide$tissue==1,]
+    decont_obj <- CreateSlide(res$decont,
+                              c(metadata(slide_obj),res$meta),
+                              gene_cutoff = 0, verbose=FALSE)
+    names(decont_obj@assays) <- "decont"
+
+    return(decont_obj)
+}
+
+#' @param gene_cutoff (num) Filter out genes with average expressions
+#' among tissue spots below or equal to this cutoff.
+#' Only applies to \code{SpatialExperiment} object.
+#' Default: 0.1.
+#'
+#' @method SpotClean SpatialExperiment
+#' @rdname SpotClean
+#'
+#' @export
+
+SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
+                                        gene_cutoff=0.1,
+                                        maxit=30, tol=1,
+                                        candidate_radius=5*seq_len(6),
+                                        kernel="gaussian",
+                                        verbose=TRUE, ...){
+    # raw data matrix
+    raw_data <- assays(slide_obj)$counts
+    if(is.null(raw_data)){
+        stop("Cannot find raw data in input slide object.")
+    }
+
+    # collect spot info from the SpatialExperiment object
+    slide <- data.frame(spatialData(slide_obj))
+    slide <- rename(slide, tissue="in_tissue", row="array_row", col="array_col")
+    slide$barcode <- rownames(slide)
+    slide$tissue <- factor(as.integer(slide$tissue))
+    image_pos <- spatialCoords(slide_obj)*scaleFactors(slide_obj)
+    slide$imagecol <- image_pos[,"pxl_col_in_fullres"]
+    slide$imagerow <- image_pos[,"pxl_row_in_fullres"]
+
+    # filter genes
+    gene_cutoff <- max(gene_cutoff,0)
+    good_gene <- rowMeans(raw_data[,slide$tissue==1])>gene_cutoff
+    if(verbose){
+        message("Filtered out ",sum(!good_gene)
+                ," genes with average expressions below or equal to ",
+                gene_cutoff, ".")
+    }
+    raw_data <- raw_data[good_gene,]
+
+    # run SpotClean
+    res <- .SpotClean(raw_data=raw_data, slide=slide,
+                      gene_keep=gene_keep,
+                      maxit=maxit, tol=tol,
+                      candidate_radius=candidate_radius,
+                      kernel=kernel,
+                      verbose=verbose)
+
+    # create output
+    decont_obj <- slide_obj[rownames(res$decont),
+                            slide$barcode[slide$tissue==1]]
+    assays(decont_obj)$decont <- res$decont
+    metadata(decont_obj) <- c(metadata(decont_obj), res$meta)
+    return(decont_obj)
+}
+
+.SpotClean <- function(raw_data, slide,
+                       gene_keep=NULL,
+                       maxit=30, tol=1,
+                       candidate_radius=5*seq_len(6),
+                       kernel="gaussian",
+                       verbose=TRUE){
 
     if(verbose){
         message(Sys.time(), " Start.")
@@ -88,11 +197,6 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     #############################
 
     # some universal variables
-    raw_data <- assays(slide_obj)$raw  # raw data matrix
-    if(is.null(raw_data)){
-        stop("Cannot find raw data in input slide object.")
-    }
-    slide <- metadata(slide_obj)$slide  # slide info
     n_spots <- ncol(raw_data)  # number of spots
     ts_idx <- which(slide$tissue==1)  # tissue index
     raw_ts_data <- raw_data[,ts_idx, drop=FALSE]  # raw tissue data matrix
@@ -112,7 +216,8 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
     imagerow <- imagecol <- tissue <- NULL
 
     # calculate ARC score
-    ARC_score <- ARCScore(slide_obj)
+    ARC_score <- ARCScore(raw_data,
+                          background_bcs=slide$barcode[slide$tissue==0])
 
     # estimate spot distance in pixels
     # Note: imagecol may not correspond to col, but correspond to row
@@ -235,7 +340,7 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
                                       weight_mat, n_spots)
 
     # write results
-    meta <- c(metadata(slide_obj), list(
+    meta <- list(
         bleeding_rate=bleed_rate,
         distal_rate=distal_rate,
         contamination_radius=cont_radius,
@@ -244,17 +349,14 @@ SpotClean <- function(slide_obj, gene_keep=NULL,
         decontaminated_genes=gene_keep,
         contamination_rate=cont_rate,
         ARC_score=ARC_score
-    ))
-    meta$slide <- filter(meta$slide, tissue==1)
-    decont_obj <- CreateSlide(decont_data, meta,
-                              gene_cutoff = 0, verbose=FALSE)
-    names(decont_obj@assays) <- "decont"
+    )
 
     if(verbose){
         message(Sys.time(), " All finished.")
     }
 
-    return(decont_obj)
+    return(list(decont=decont_data, meta=meta))
+
 }
 
 .calculate_euclidean_weight <- function(x){

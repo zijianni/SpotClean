@@ -48,6 +48,7 @@ CreateSlide <- function(count_mat, slide_info, gene_cutoff=0.1, verbose=TRUE){
         slide_info <- list(slide=slide_info)
     }
 
+    rownames(slide_info$slide) <- slide_info$slide$barcode
     if(!identical(sort(colnames(count_mat)),
                  sort(slide_info$slide$barcode)
                  )){
@@ -56,7 +57,7 @@ CreateSlide <- function(count_mat, slide_info, gene_cutoff=0.1, verbose=TRUE){
     }
 
     # rearrange barcodes
-    count_mat <- count_mat[,slide_info$slide$barcode]
+    slide_info$slide <- slide_info$slide[colnames(count_mat),]
     count_ts_mat <- count_mat[,slide_info$slide$tissue==1]
 
     # filter genes
