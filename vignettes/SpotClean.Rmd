@@ -80,6 +80,19 @@ VisualizeHeatmap(decont_obj,decont_obj@metadata$contamination_rate,
 seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 ```
 
+## Working with the `SpatialExperiment` class
+
+[`SpatialExperiment`](https://bioconductor.org/packages/release/bioc/html/SpatialExperiment.html) is another widely used S4 class for storing ST data, including the count matrix, cell and gene-level metadata, and tissue image. `SpotClean()` can be directly applied to `SpatialExperiment` objects constructed from `SpatialExperiment::read10xVisium()`, which reads in the raw data from 10x Visium Space Ranger output. The visualization functions in our package currently do not support `SpatialExperiment` class, but there are alternative options such as [`ggspavis`](https://bioconductor.org/packages/release/bioc/html/ggspavis.html).
+
+```{r, eval=F}
+# Not run
+library(SpatialExperiment)
+slide_obj <- read10xVisium(samples = "/path/to/spaceranger/output/", 
+                         data = "raw") # must specify data = "raw"
+decont_obj <- SpotClean(slide_obj)
+str(assays(decont_obj)$decont)
+```
+
 ## Running Speed
 
 The computational speed is related to the size and structure of input datasets, mainly driven by the number of tissue spots. SpotClean does not require parallel computation, and thus does not use up too many CPU or memory resources. As a reference, SpotClean running on a medium-size dataset (around 30,000 genes and 2,000 tissue spots) under default gene filtering takes less than 15 minutes.

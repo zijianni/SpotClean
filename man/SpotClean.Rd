@@ -2,21 +2,41 @@
 % Please edit documentation in R/decontamination.R
 \name{SpotClean}
 \alias{SpotClean}
+\alias{SpotClean.SummarizedExperiment}
+\alias{SpotClean.SpatialExperiment}
 \title{Decontaminate spot swapping effect in spatial transcriptomics data}
 \usage{
-SpotClean(
+SpotClean(slide_obj, ...)
+
+\method{SpotClean}{SummarizedExperiment}(
   slide_obj,
   gene_keep = NULL,
   maxit = 30,
   tol = 1,
   candidate_radius = 5 * seq_len(6),
   kernel = "gaussian",
-  verbose = TRUE
+  verbose = TRUE,
+  ...
+)
+
+\method{SpotClean}{SpatialExperiment}(
+  slide_obj,
+  gene_keep = NULL,
+  gene_cutoff = 0.1,
+  maxit = 30,
+  tol = 1,
+  candidate_radius = 5 * seq_len(6),
+  kernel = "gaussian",
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
 \item{slide_obj}{A slide object created or inherited from
-\code{CreateSlide()}.}
+\code{CreateSlide()}, or a \code{SpatialExperiment} object created from
+\code{SpatialExperiment::read10xVisium()}.}
+
+\item{...}{Arguments passed to other methods}
 
 \item{gene_keep}{(vector of chr) Gene names to keep for decontamination.
 We recommend not decontaminating lowly expressed and lowly variable genes
@@ -43,17 +63,29 @@ Supports "gaussian", "linear", "laplace", "cauchy". Default: "gaussian".}
 
 \item{verbose}{(logical) Whether print progress information.
 Default: \code{TRUE}}
+
+\item{gene_cutoff}{(num) Filter out genes with average expressions
+among tissue spots below or equal to this cutoff.
+Only applies to \code{SpatialExperiment} object.
+Default: 0.1.}
 }
 \value{
-A slide object where the decontaminated expression matrix is in the
+For slide object created from \code{CreateSlide()}, returns a
+slide object where the decontaminated expression matrix is in the
 "decont" assay slot and the contamination statistics are in
 metadata slots. Contamination statistics include ambient RNA contamination
 (ARC) score, bleeeding rate, distal rate, contamination radius,
 contamination kernel weight matrix, log-likelihood value in each iteration,
 estimated proportion of contamination in each tissue spot in observed data.
-Since decontaminated and raw data have different columns, they can
-not be stored in a single SummarizedExperiment object.
-Do not overwrite the raw slide object.
+Since decontaminated and raw data have different number of columns, they can
+not be stored in a single object.
+
+For \code{SpatialExperiment} object created from
+\code{SpatialExperiment::read10xVisium()}, returns a
+\code{SpatialExperiment} object where the decontaminated expression matrix
+is in the "decont" assay slot and the contamination statistics are in
+metadata slots. Raw expression matrix is also stored in the "counts" assay
+slot. Genes are filtered based on \code{gene_cutoff}.
 }
 \description{
 This is the main function implementing the SpotClean method

@@ -8,7 +8,7 @@ mbrain_obj <- CreateSlide(mbrain_raw,
 
 test_that("Decontamination",{
     expect_silent(mbrain_decont_obj <- SpotClean(mbrain_obj, candidate_radius=20,
-                                           maxit = 3, verbose = FALSE))
+                                                 maxit = 3, verbose = FALSE))
     expect_s4_class(mbrain_decont_obj,"SummarizedExperiment")
     expect_identical(names(mbrain_decont_obj@assays),"decont")
     expect_equal(metadata(mbrain_decont_obj)$ARC_score, 0.05160659)
@@ -16,16 +16,18 @@ test_that("Decontamination",{
                  tolerance = 4e-8)
     expect_equal(metadata(mbrain_decont_obj)$distal_rate, 0.2154095,
                  tolerance = 4e-8)
-    expect_equal(metadata(mbrain_decont_obj)$weight_matrix[1,1], 0.0001488985,
-                 tolerance = 4e-8)
+    expect_equal(metadata(mbrain_decont_obj)$weight_matrix[
+        "AAACAAGTATCTCCCA-1","AAACAACGAATAGTTC-1"
+    ], 0.00004315095, tolerance = 4e-8)
     expect_equal(metadata(mbrain_decont_obj)$loglh,
                  c(167030816, 167314060, 167379802))
-    expect_equal(unname(metadata(mbrain_decont_obj)$contamination_rate[1:3]),
-                 c(0.1133368, 0.1458602, 0.1546998),
-                 tolerance = 4e-8)
+    expect_equal(unname(metadata(mbrain_decont_obj)$contamination_rate[
+        c("AAACAAGTATCTCCCA-1", "AAACAATCTACTAGCA-1", "AAACACCAATAACTGC-1")
+        ]), c(0.2794837, 0.3102042, 0.2128133), tolerance = 4e-8)
 
     expect_equal(rowSums(assay(mbrain_decont_obj)),rowSums(assay(mbrain_obj)))
-    expect_equal(assay(mbrain_decont_obj)[1,1],2645.022778)
+    expect_equal(assay(mbrain_decont_obj)["Bc1","AAACAAGTATCTCCCA-1"],
+                 1457.840109)
 
 })
 

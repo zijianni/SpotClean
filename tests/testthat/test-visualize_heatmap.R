@@ -48,8 +48,10 @@ gp3 <- VisualizeHeatmap(mbrain_slide_info$slide, value="Bc1", mbrain_raw,
 gp4 <- VisualizeHeatmap(mbrain_slide_info2$slide, value="Bc1", mbrain_raw)
 
 test_that("Subsetting barcodes", {
-    expect_identical(gp1$data, gp2$data)
-    expect_identical(gp3$data, gp4$data)
+    expect_identical(gp1$data, gp2$data[match(gp1$data$barcode,
+                                              gp2$data$barcode),])
+    expect_identical(gp3$data, gp4$data[match(gp3$data$barcode,
+                                              gp4$data$barcode),])
 })
 
 test_that("Object class", {

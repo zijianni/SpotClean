@@ -27,7 +27,8 @@ gp1 <- VisualizeLabel(mbrain_obj, subset_barcodes = colnames(mbrain_obj2))
 gp2 <- VisualizeLabel(mbrain_obj2)
 
 test_that("Subsetting barcodes", {
-    expect_identical(gp1$data, gp2$data)
+    expect_identical(gp1$data, gp2$data[match(gp1$data$barcode,
+                                              gp2$data$barcode),])
 
 })
 
