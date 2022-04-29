@@ -46,6 +46,7 @@ Load package after installation:
 
 ```{r}
 library(SpotClean)
+library(S4Vectors)
 ```
 
 ## Short Demo
@@ -72,7 +73,7 @@ decont_obj <- SpotClean(mbrain_obj)
 VisualizeHeatmap(decont_obj,rownames(mbrain_raw)[1])
 
 # Visualize the estimated per-spot contamination rate
-VisualizeHeatmap(decont_obj,decont_obj@metadata$contamination_rate, 
+VisualizeHeatmap(decont_obj,metadata(decont_obj)$contamination_rate, 
                  logged = FALSE, legend_title = "contamination rate",
                  legend_range = c(0,1))
 
@@ -199,7 +200,7 @@ Check the structure of output slide object:
 
 ```{r}
 decont_obj
-names(decont_obj@metadata)
+names(metadata(decont_obj))
 ```
 
 The metadata now contains more information including parameter estimates from the SpotClean model and measurements of contamination levels. 
@@ -215,7 +216,7 @@ VisualizeHeatmap(decont_obj,"Mbp")
 Our model is able to estimate the proportion of contaminated expression at each tissue spot (i.e. expression at a tissue spot that orginated from a different spot due to spot swapping):
 
 ```{r}
-summary(decont_obj@metadata$contamination_rate)
+summary(metadata(decont_obj)$contamination_rate)
 ```
 
 This indicates around 30% of UMIs at a tissue spot in the observed data came from spot swapping contamination, averaging across all tissue spots.
