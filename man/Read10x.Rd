@@ -20,14 +20,14 @@ three files: barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz.}
 \item{row_name}{(chr) Specify either using gene symbols
 (\code{row_name = "symbol"}) or gene Ensembl IDs (\code{row_name = "id"})
 as row names of the count matrix.
-Default: \code{row_name = "symbol"}.}
+Default: \code{row_name = "symbol"}}
 
 \item{meta}{(logical) If \code{TRUE}, \code{Read10xRaw} or
 \code{Read10xRawH5} returns a list containing both the
 count matrix and metadata of genes (features). Metadata includes feature
 names, IDs and other additional information depending on Space Ranger
 output. If \code{FALSE}, only returns the count matrix.
-Default: \code{FALSE}.}
+Default: \code{FALSE}}
 
 \item{h5_file}{(chr) The path of 10x output matrix HDF5 file
 (ended with .h5).}
@@ -40,13 +40,13 @@ tissue image in PNG format,
 usually named \code{tissue_lowres_image.png}. If \code{NULL},
 the returned slide data does not contain image
 information. Please do provide this file if you could find it.
-Default: \code{NULL}.}
+Default: \code{NULL}}
 
 \item{scale_factor_file}{(chr) The path of the 10x output scale factor
 file in json format, usually named \code{scalefactors_json.json}.
 If \code{NULL}, spot positions in image will
 not be corrected by the scale factor. Please do provide this file
-if you could find it. Default: \code{NULL}.}
+if you could find it. Default: \code{NULL}}
 }
 \value{
 If \code{meta = TRUE}, \code{Read10xRaw()} or \code{Read10xRawH5()}

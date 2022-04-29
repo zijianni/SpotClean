@@ -13,7 +13,7 @@ We developed **SpotClean** to adjust for the effects of spot swapping in ST expe
 
 ### Installation
 
-Install the Github version:
+Install the GitHub version:
 
 ```{r}
 if(!requireNamespace("devtools", quietly = TRUE))

@@ -213,7 +213,7 @@ VisualizeHeatmap(decont_obj,"Mbp")
 
 ## Estimate contamination levels in observed data
 
-Our model is able to estimate the proportion of contaminated expression at each tissue spot (i.e. expression at a tissue spot that orginated from a different spot due to spot swapping):
+Our model is able to estimate the proportion of contaminated expression at each tissue spot (i.e. expression at a tissue spot that originated from a different spot due to spot swapping):
 
 ```{r}
 summary(metadata(decont_obj)$contamination_rate)

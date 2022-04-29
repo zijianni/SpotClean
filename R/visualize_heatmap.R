@@ -56,8 +56,8 @@ VisualizeHeatmap <- function(object, ...) {
 #' @param viridis (logical) If true, color scale uses viridis.
 #' Otherwise, use rainbow. Default: \code{TRUE}
 #'
-#' @param legend_range (length 2 vector of num) Custom legend range of the value.
-#' By default uses the range of the plotted values.
+#' @param legend_range (length 2 vector of num) Custom legend
+#' range of the value. By default uses the range of the plotted values.
 #' Default: \code{NULL}
 #'
 #' @param title (chr) Title of the plot. Default: \code{""}

@@ -4,18 +4,21 @@
 \alias{ConvertToSeurat}
 \title{Convert slide object to Seurat object}
 \usage{
-ConvertToSeurat(slide_obj, image_dir, slice = "slice1")
+ConvertToSeurat(slide_obj, image_dir, slice = "slice1", filter_matrix = TRUE)
 }
 \arguments{
 \item{slide_obj}{A slide object created or inherited from
 \code{CreateSlide()}.}
 
-\item{image_dir}{Path to directory with 10X Genomics visium image data;
+\item{image_dir}{(chr) Path to directory with 10X Genomics visium image data;
 should include files \code{tissue_lowres_iamge.png},
 \code{scalefactors_json.json} and \code{tissue_positions_list.csv}.}
 
-\item{slice}{Name for the stored image of the tissue slice.
-Default: "slice1".}
+\item{slice}{(chr) Name for the stored image of the tissue slice.
+Default: "slice1"}
+
+\item{filter_matrix}{(logical) If TRUE, only keep spots that have been
+determined to be over tissue. Default: \code{TRUE}}
 }
 \value{
 A Seurat object with spatial information.
@@ -33,7 +36,7 @@ data(mbrain_raw)
 data(mbrain_slide_info)
 mbrain_obj <- CreateSlide(mbrain_raw,
                           mbrain_slide_info)
-example_image_dir <- 'path/to/image/dir'
+example_image_dir <- "path/to/image/dir"
 seurat_obj <- ConvertToSeurat(mbrain_obj, example_image_dir, "raw")
 str(seurat_obj)
 }

@@ -16,7 +16,7 @@ like barcode, tissue, imagerow, imagecol, etc.}
 
 \item{gene_cutoff}{(num) Filter out genes with average expressions
 among tissue spots below or equal to this cutoff.
-Default: 0.1.}
+Default: 0.1}
 
 \item{verbose}{(logical) Whether print progress information.
 Default: \code{TRUE}}

@@ -38,17 +38,17 @@ spots, or the column name in the \code{slide} slot of the slide
 object's metadata. In the former case, the order of values in the vector
 should match the spot barcodes in the slide object. In the latter case,
 The column should be categorical with reasonably number of unique labels.
-Default: \code{"tissue"}.}
+Default: \code{"tissue"}}
 
 \item{subset_barcodes}{(vector of chr) A subset of spot barcodes to plot.
 By default it plots all spots in the slide object. This can be useful
 when only plotting tissue spots or specific tissue types or regions.
-Default: \code{NULL}.}
+Default: \code{NULL}}
 
-\item{title}{(chr) Title of the plot. Default: \code{""}.}
+\item{title}{(chr) Title of the plot. Default: \code{""}}
 
 \item{legend_title}{(chr) Title of the legend. Under default,
-use \code{label} as legend title. Default: \code{NULL}.}
+use \code{label} as legend title. Default: \code{NULL}}
 }
 \value{
 A \code{ggplot2} object.

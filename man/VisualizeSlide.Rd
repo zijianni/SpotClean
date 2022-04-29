@@ -10,7 +10,7 @@ VisualizeSlide(slide_obj, title = "")
 \item{slide_obj}{A slide object created or inherited from
 \code{CreateSlide()}.}
 
-\item{title}{(chr) Title of the plot. Default: \code{""}.}
+\item{title}{(chr) Title of the plot. Default: \code{""}}
 }
 \value{
 A \code{ggplot2} object.

@@ -49,27 +49,27 @@ vector should match the spot barcodes in the slide object.}
 \item{exp_matrix}{(matrix of num) When \code{object} is a data frame and
 \code{value} is a single character
 string, will search the matching gene in \code{exp_matrix} and plot the gene
-expression. Default: \code{NULL}.}
+expression. Default: \code{NULL}}
 
 \item{subset_barcodes}{(vector of chr) A subset of spot barcodes to plot.
 By default it plots all spots in the slide object. This can be useful
 when only plotting tissue spots or specific tissue types or regions.
-Default: \code{NULL}.}
+Default: \code{NULL}}
 
 \item{logged}{(logical) Specify if the color scale is log1p transformed.
-Default: \code{TRUE}.}
+Default: \code{TRUE}}
 
 \item{viridis}{(logical) If true, color scale uses viridis.
-Otherwise, use rainbow. Default: \code{TRUE}.}
+Otherwise, use rainbow. Default: \code{TRUE}}
 
-\item{legend_range}{(length 2 vector of num) Custom legend range of the value.
-By default uses the range of the plotted values.
-Default: \code{NULL}.}
+\item{legend_range}{(length 2 vector of num) Custom legend
+range of the value. By default uses the range of the plotted values.
+Default: \code{NULL}}
 
-\item{title}{(chr) Title of the plot. Default: \code{""}.}
+\item{title}{(chr) Title of the plot. Default: \code{""}}
 
 \item{legend_title}{(chr) Title of the legend. Under default,
-use \code{value} as legend title. Default: \code{NULL}.}
+use \code{value} as legend title. Default: \code{NULL}}
 }
 \value{
 A \code{ggplot2} object.
