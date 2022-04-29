@@ -68,11 +68,11 @@ SpotClean <- function(slide_obj, ...) {
 #' @param tol (num) Tolerance to define convergence in EM parameter updates.
 #' When the element-wise maximum difference between current and updated
 #' parameter matrix is less than \code{tol}, parameters are considered
-#' converged. Default: 1.
+#' converged. Default: 1
 #'
 #' @param candidate_radius (vector of num) Candidate contamination radius.
 #' A series of radius to try when estimating contamination parameters.
-#' Default: {5, 10, 15, 20, 25, 30}
+#' Default: {c(5, 10, 15, 20, 25, 30)}
 #'
 #' @param kernel (chr): name of kernel to use to model local contamination.
 #' Supports "gaussian", "linear", "laplace", "cauchy". Default: "gaussian".

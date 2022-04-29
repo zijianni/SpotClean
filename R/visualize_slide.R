@@ -7,7 +7,7 @@
 #' @param slide_obj A slide object created or inherited from
 #' \code{CreateSlide()}.
 #'
-#' @param title (chr) Title of the plot. Default: \code{""}.
+#' @param title (chr) Title of the plot. Default: \code{""}
 #'
 #' @return A \code{ggplot2} object.
 #'

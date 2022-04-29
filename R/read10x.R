@@ -30,25 +30,25 @@
 #' usually named \code{tissue_lowres_image.png}. If \code{NULL},
 #' the returned slide data does not contain image
 #' information. Please do provide this file if you could find it.
-#' Default: \code{NULL}.
+#' Default: \code{NULL}
 #'
 #' @param scale_factor_file (chr) The path of the 10x output scale factor
 #' file in json format, usually named \code{scalefactors_json.json}.
 #' If \code{NULL}, spot positions in image will
 #' not be corrected by the scale factor. Please do provide this file
-#' if you could find it. Default: \code{NULL}.
+#' if you could find it. Default: \code{NULL}
 #'
 #' @param row_name (chr) Specify either using gene symbols
 #' (\code{row_name = "symbol"}) or gene Ensembl IDs (\code{row_name = "id"})
 #' as row names of the count matrix.
-#' Default: \code{row_name = "symbol"}.
+#' Default: \code{row_name = "symbol"}
 #'
 #' @param meta (logical) If \code{TRUE}, \code{Read10xRaw} or
 #' \code{Read10xRawH5} returns a list containing both the
 #' count matrix and metadata of genes (features). Metadata includes feature
 #' names, IDs and other additional information depending on Space Ranger
 #' output. If \code{FALSE}, only returns the count matrix.
-#' Default: \code{FALSE}.
+#' Default: \code{FALSE}
 #'
 #' @return If \code{meta = TRUE}, \code{Read10xRaw()} or \code{Read10xRawH5()}
 #' returns a list of two elements: a

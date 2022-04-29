@@ -16,7 +16,7 @@
 #'
 #' @param gene_cutoff (num) Filter out genes with average expressions
 #' among tissue spots below or equal to this cutoff.
-#' Default: 0.1.
+#' Default: 0.1
 #'
 #' @param verbose (logical) Whether print progress information.
 #' Default: \code{TRUE}
