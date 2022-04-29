@@ -3,10 +3,12 @@ Version: 0.99.5
 Date: 2022/4/15
 Title: SpotClean adjusts for spot swapping in spatial transcriptomics data
 Authors@R: c(
-    person("Zijian", "Ni", role = c("aut", "cre"), email = "zni25@wisc.edu"), 
-    person("Christina", "Kendziorski", role="ctb"))
+    person("Zijian", "Ni", email="zni25@wisc.edu", role = c("aut", "cre"), 
+        comment = c(ORCID = "0000-0003-1181-8337")),
+    person("Christina", "Kendziorski", role = "ctb")
+  )
 Depends: 
-    R (>= 4.0.0),
+    R (>= 4.1.0),
 Imports: 
     stats,
     methods,
@@ -38,6 +40,7 @@ biocViews:
     Sequencing,
     GeneExpression,
     Spatial,
+    SingleCell,
     Transcriptomics,
     Preprocessing
 Description: 

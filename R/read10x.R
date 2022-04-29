@@ -216,7 +216,9 @@ Read10xRawH5 <- function(h5_file,
 #'
 #' @export
 
-Read10xSlide <- function(tissue_csv_file, tissue_img_file = NULL, scale_factor_file = NULL){
+Read10xSlide <- function(tissue_csv_file,
+                         tissue_img_file = NULL,
+                         scale_factor_file = NULL){
 
     # Load tissue information
     slide <- read.csv(tissue_csv_file,
@@ -232,7 +234,9 @@ Read10xSlide <- function(tissue_csv_file, tissue_img_file = NULL, scale_factor_f
         # Load downsampled image
         tissue_img_file <- read.bitmap(tissue_img_file)
 
-        grob <- rasterGrob(tissue_img_file, width=unit(1,"npc"), height=unit(1,"npc"))
+        grob <- rasterGrob(tissue_img_file,
+                           width=unit(1,"npc"),
+                           height=unit(1,"npc"))
 
         slide$height <- nrow(tissue_img_file)
         slide$width <- ncol(tissue_img_file)
