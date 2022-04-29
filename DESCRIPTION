@@ -1,5 +1,5 @@
 Package: SpotClean
-Version: 0.99.5
+Version: 0.99.6
 Date: 2022/4/15
 Title: SpotClean adjusts for spot swapping in spatial transcriptomics data
 Authors@R: c(
