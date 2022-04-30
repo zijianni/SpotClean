@@ -17,8 +17,11 @@ should include files \code{tissue_lowres_iamge.png},
 \item{slice}{(chr) Name for the stored image of the tissue slice.
 Default: "slice1"}
 
-\item{filter_matrix}{(logical) If TRUE, only keep spots that have been
-determined to be over tissue. Default: \code{TRUE}}
+\item{filter_matrix}{(logical) If \code{TRUE}, only keep spots that have been
+determined to be over tissue. If \code{slide_obj} only contains tissue spots,
+\code{filter_matrix} has to be set \code{TRUE}. If \code{slide_obj}
+contains both tissue and background spots, setting \code{filter_matrix=TRUE}
+will subset the expression matrix to tissue spots only. Default: \code{TRUE}}
 }
 \value{
 A Seurat object with spatial information.

@@ -74,7 +74,7 @@ For slide object created from \code{CreateSlide()}, returns a
 slide object where the decontaminated expression matrix is in the
 "decont" assay slot and the contamination statistics are in
 metadata slots. Contamination statistics include ambient RNA contamination
-(ARC) score, bleeeding rate, distal rate, contamination radius,
+(ARC) score, bleeding rate, distal rate, contamination radius,
 contamination kernel weight matrix, log-likelihood value in each iteration,
 estimated proportion of contamination in each tissue spot in observed data.
 Since decontaminated and raw data have different number of columns, they can
