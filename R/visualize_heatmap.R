@@ -122,7 +122,9 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
 }
 
 
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_point coord_cartesian xlim ylim
+#' @importFrom ggplot2 xlab ylab ggtitle labs theme_set theme_bw
+#' @importFrom ggplot2 theme element_blank element_line
 #' @importFrom dplyr filter
 #'
 .visualize_heatmap <- function(slide, value, exp_mat=NULL,
@@ -249,6 +251,7 @@ VisualizeHeatmap.SummarizedExperiment <- function(object, value,
 #' @importFrom viridis scale_fill_viridis
 #' @importFrom grDevices colorRampPalette
 #' @importFrom RColorBrewer brewer.pal
+#' @importFrom ggplot2 scale_fill_gradientn
 #'
 .scale_fill_fun <- function(viridis=TRUE, ...){
     if(viridis){

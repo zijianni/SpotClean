@@ -21,7 +21,9 @@
 #' plot(gp)
 
 
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes coord_cartesian xlim ylim xlab ylab
+#' @importFrom ggplot2 ggtitle guides guide_legend theme_set theme_bw
+#' @importFrom ggplot2 theme element_blank element_line
 #' @importFrom tibble tibble
 #' @importFrom S4Vectors metadata
 #'
@@ -67,6 +69,7 @@ VisualizeSlide <- function(slide_obj, title=""){
 
 
 #' @import grid
+#' @importFrom ggplot2 ggproto Geom ggproto_parent layer
 # This function is developed based on 10x's secondary analysis pipeline
 # https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/rkit.
 

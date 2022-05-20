@@ -94,7 +94,9 @@ VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
 
 }
 
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot aes geom_point coord_cartesian xlim ylim
+#' @importFrom ggplot2 xlab ylab ggtitle labs guides guide_legend
+#' @importFrom ggplot2 theme_set theme_bw theme element_blank element_line
 #' @importFrom dplyr filter
 #'
 .visualize_label <- function(slide, label="tissue",
