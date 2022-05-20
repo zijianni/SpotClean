@@ -4,7 +4,8 @@ authors: "Zijian Ni and Christina Kendziorski"
 package: SpotClean
 date: "`r Sys.Date()`"
 output: 
-    BiocStyle::html_document
+    BiocStyle::html_document:
+        toc: true
 vignette: >
     %\VignetteIndexEntry{SpotClean}
     %\VignetteEngine{knitr::rmarkdown}
