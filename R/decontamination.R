@@ -51,6 +51,9 @@
 #' @export
 
 SpotClean <- function(slide_obj, ...) {
+    if(!class(slide_obj)%in%c("SummarizedExperiment","SpatialExperiment")){
+        stop("Invalid slide object.")
+    }
     UseMethod(generic = "SpotClean", object = slide_obj)
 }
 
@@ -100,6 +103,10 @@ SpotClean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
                                            kernel="gaussian",
                                            verbose=TRUE, ...){
 
+    # validate arguments
+    .check_arguments(gene_keep, gene_cutoff=Inf, maxit, tol,
+                     candidate_radius, kernel, verbose)
+
     raw_data <- assays(slide_obj)$raw  # raw data matrix
     if(is.null(raw_data)){
         stop("Cannot find raw data in input slide object.")
@@ -140,6 +147,10 @@ SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
                                         candidate_radius=5*seq_len(6),
                                         kernel="gaussian",
                                         verbose=TRUE, ...){
+    # validate arguments
+    .check_arguments(gene_keep, gene_cutoff, maxit, tol,
+                     candidate_radius, kernel, verbose)
+
     # raw data matrix
     raw_data <- assays(slide_obj)$counts
     if(is.null(raw_data)){
@@ -179,6 +190,46 @@ SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     assays(decont_obj)$decont <- res$decont
     metadata(decont_obj) <- c(metadata(decont_obj), res$meta)
     return(decont_obj)
+}
+
+.check_arguments <- function(gene_keep,
+                             gene_cutoff,
+                             maxit, tol,
+                             candidate_radius,
+                             kernel,
+                             verbose){
+    bad_args <- c()
+    if(!(is.null(gene_keep) | is.character(gene_keep))){
+        bad_args <- c(bad_args, "gene_keep")
+    }
+    if(!is.numeric(gene_cutoff)){
+        bad_args <- c(bad_args, "gene_cutoff")
+    }
+    if(!is.numeric(maxit)) {
+        bad_args <- c(bad_args, "maxit")
+    }
+    if(!is.numeric(candidate_radius)){
+        bad_args <- c(bad_args, "candidate_radius")
+    }
+    if(!kernel%in%c("gaussian", "linear", "laplace", "cauchy")){
+        bad_args <- c(bad_args, "kernel")
+    }
+    if(!is.logical(verbose)){
+        bad_args <- c(bad_args, "verbose")
+    }
+    if(length(bad_args)>0){
+        stop("invalid argument(s) (",paste(bad_args,collapse = ", "),")")
+    }
+
+    if(gene_cutoff<0) {
+        stop("gene_cutoff should be non-negative")
+    }
+    if(maxit<=1 | maxit%%1!=0) {
+        stop("maxit should be an integer greater than 1")
+    }
+    if(!all(candidate_radius>0)){
+        stop("candidate_radius should be positive")
+    }
 }
 
 .SpotClean <- function(raw_data, slide,
@@ -662,7 +713,7 @@ SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
 
 .gr_optim <- function(x, obs_exp, ts_idx, nonzero_pos,
                       W_yy, WtW, I_yy, Wyy_tWyy, I1_yy, n_spots, WtZ, I1tZ){
-    # Gradient of .fr_optim
+    # Gradient of .fn_optim
 
     # recover full dimension of x
     N <- length(ts_idx)

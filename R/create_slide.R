@@ -41,6 +41,16 @@
 
 CreateSlide <- function(count_mat, slide_info, gene_cutoff=0.1, verbose=TRUE){
 
+    # validate arguments
+    if(!is.numeric(gene_cutoff)){
+        stop("invalid argument (gene_cutoff)")
+    }
+    if(gene_cutoff<0) {
+        stop("gene_cutoff should be non-negative")
+    }
+    if(!is.logical(verbose)){
+        stop("invalid argument (verbose)")
+    }
     if(is.data.frame(slide_info) &
        all(c("barcode","tissue","imagerow","imagecol"
              )%in%colnames(slide_info))){
