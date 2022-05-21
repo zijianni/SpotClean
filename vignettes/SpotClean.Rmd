@@ -53,7 +53,7 @@ library(S4Vectors)
 
 ## Short Demo
 
-Here we quickly demonstrate the general SpotClean workflow on the bundled example data. A step-by-step illustration can be found in the next section.
+Here we quickly demonstrate the general SpotClean workflow on the built-in example data. A step-by-step illustration can be found in the next section.
 
 ```{r, eval=FALSE}
 # Not run
@@ -118,43 +118,27 @@ SpotClean will not alter clusters substantially in most datasets given that clus
 
 ## Load count matrix and slide information from 10x Space Ranger output
 
-Currently, the most widely-used spatial transcriptomics protocol is 10x Visium. `SpotClean` provides functions to directly read 10x Space Ranger output files and generate a feature-by-barcode count matrix and slide information in R. Public 10x datasets can be found [here](https://support.10xgenomics.com/spatial-gene-expression/datasets/).
+Currently, the most widely-used spatial transcriptomics protocol is 10x Visium. Public 10x datasets can be found [here](https://support.10xgenomics.com/spatial-gene-expression/datasets/). In this vignette, we illustrate the usage of `SpotClean` using the [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain) Visium data. 
 
-`SpotClean` contains a small subset of 10x data corresponding to the top 100 highest expressed genes of [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). Below we show how to process raw 10x Space Ranger output files to get this same example subset of data.
+Two parts of 10x Space Ranger output files are required as input to `SpotClean`: the raw gene-by-spot count matrix, and the slide metadata. In this example, you can download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz`, and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot count matrix, and the latter contains slide metadata like slide images and spot IDs and positions.
 
-First, download and unzip the [Feature / cell matrix (raw)](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_raw_feature_bc_matrix.tar.gz) and [Spatial imaging data](https://cf.10xgenomics.com/samples/spatial-exp/1.0.0/V1_Adult_Mouse_Brain/V1_Adult_Mouse_Brain_spatial.tar.gz) from [V1_Adult_Mouse_Brain](https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain). You will get a folder `raw_feature_bc_matrix` containing `barcodes.tsv.gz`, `features.tsv.gz`, `matrix.mtx.gz` and a folder `spatial` containing `aligned_fiducials.jpg`, `detected_tissue_image.jpg`, `tissue_hires_image.png`, `tissue_lowres_image.png`, `tissue_positions_list.csv`, `scalefactors_json.json`. The former folder contains the raw gene-by-spot count matrix, and the latter contains slide metadata like slide images and spot IDs and positions.
-
-We can load these files using `Read10xRaw()` and `Read10xSlide()`, and check whether they are identical to the bundled example data:
-
-```{r, eval=F}
-# Not run
-
-raw_mat <- Read10xRaw(count_dir = "/path/to/raw_feature_bc_matrix/")
-slide_info <- Read10xSlide(tissue_csv_file="/path/to/tissue_positions_list.csv", 
-                           tissue_img_file="/path/to/tissue_lowres_image.png",
-                           scale_factor_file="/path/to/scalefactors_json.json")
-
-# Compare with bundled example data
-data(mbrain_raw)
-data(mbrain_slide_info)
-slide_info$slide$total_counts <- colSums(
-    raw_mat[rownames(mbrain_raw),mbrain_slide_info$slide$barcode]
-)
-
-identical(raw_mat[rownames(mbrain_raw),], mbrain_raw)
-identical(slide_info$slide, mbrain_slide_info$slide)
-```
-
-## Create the slide object
-
-In the following, we will show the `SpotClean` workflow using the bundled example data. 
-
-We combine count matrix and slide metadata together as one single slide object with class `SummarizedExperiment`:
+`SpotClean` provides functions `Read10xRaw()` and `Read10xSlide()` to directly read these 10x Space Ranger output files and generate a gene-by-spot count matrix and slide metadata in R. Here for the purpose of demonstration, we have two built-in example objects `mbrain_raw` and `mbrain_slide_info`. `mbrain_raw` is a subset of the gene-by-spot count matrix from `Read10xRaw()`, containing the top 100 highest expressed genes. `mbrain_slide_info` is the direct output of `Read10xSlide()`.
 
 ```{r}
 data(mbrain_raw)
 data(mbrain_slide_info)
 
+str(mbrain_raw)
+str(mbrain_slide_info)
+```
+
+## Create the slide object
+
+In the following, we will show the `SpotClean` workflow using the built-in example data. 
+
+We combine count matrix and slide metadata together as one single slide object with class `SummarizedExperiment`:
+
+```{r}
 slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
 slide_obj
 ```
