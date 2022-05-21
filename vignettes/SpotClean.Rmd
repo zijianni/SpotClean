@@ -209,10 +209,10 @@ This indicates around 30% of UMIs at a tissue spot in the observed data came fro
 
 ## ARC score
 
-We also provide another subjective estimation of contamination level, called the ambient RNA contamination (ARC) score. It can be calculated using function `ARCScore()`, and is also part of the decontamination outputs. Intuitively, the ARC score is a conserved lower bound of the proportion of contamination in observed tissue spots. The ARC score can also be applied in droplet-based single-cell data to estimate ambient RNA contamination when replacing background spots with empty droplets. Details can be found by running `?ARCScore`.
+We also provide another subjective estimation of contamination level, called the ambient RNA contamination (ARC) score. It can be calculated using function `arcScore()`, and is also part of the decontamination outputs. Intuitively, the ARC score is a conserved lower bound of the proportion of contamination in observed tissue spots. The ARC score can also be applied in droplet-based single-cell data to estimate ambient RNA contamination when replacing background spots with empty droplets. Details can be found by running `?arcScore`.
 
 ```{r}
-ARCScore(slide_obj)
+arcScore(slide_obj)
 ```
 
 This indicates at least 5% expressions in observed data came from spot swapping contamination.

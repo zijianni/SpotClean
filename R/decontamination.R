@@ -267,7 +267,7 @@ SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     imagerow <- imagecol <- tissue <- NULL
 
     # calculate ARC score
-    ARC_score <- ARCScore(raw_data,
+    ARC_score <- arcScore(raw_data,
                           background_bcs=slide$barcode[slide$tissue==0])
 
     # estimate spot distance in pixels

@@ -37,17 +37,17 @@
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
 #' background_bcs <- dplyr::filter(mbrain_slide_info$slide, tissue==0)$barcode
-#' ARCScore(mbrain_raw, background_bcs)
+#' arcScore(mbrain_raw, background_bcs)
 #'
 #' mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
-#' ARCScore(mbrain_obj)
+#' arcScore(mbrain_obj)
 #'
-#' @rdname ARCScore
+#' @rdname arcScore
 #'
 #' @export
 
-ARCScore <- function(object, ...) {
-    UseMethod(generic = "ARCScore", object = object)
+arcScore <- function(object, ...) {
+    UseMethod(generic = "arcScore", object = object)
 }
 
 
@@ -59,11 +59,11 @@ ARCScore <- function(object, ...) {
 #' @importFrom Matrix colSums
 #' @importFrom methods as
 #'
-#' @method ARCScore default
-#' @rdname ARCScore
+#' @method arcScore default
+#' @rdname arcScore
 #' @export
 #'
-ARCScore.default <- function(object, background_bcs, ...){
+arcScore.default <- function(object, background_bcs, ...){
 
     if (!inherits(x = object, 'Matrix')) {
         object <- as(object = as.matrix(x = object), Class = 'Matrix')
@@ -89,8 +89,8 @@ ARCScore.default <- function(object, background_bcs, ...){
 }
 
 
-#' @method ARCScore SummarizedExperiment
-#' @rdname ARCScore
+#' @method arcScore SummarizedExperiment
+#' @rdname arcScore
 #'
 #' @importFrom SummarizedExperiment assay
 #' @importFrom S4Vectors metadata
@@ -98,7 +98,7 @@ ARCScore.default <- function(object, background_bcs, ...){
 #'
 #' @export
 #'
-ARCScore.SummarizedExperiment <- function(object, ...){
+arcScore.SummarizedExperiment <- function(object, ...){
 
     # junk code... get rid of R CMD check notes
     tissue <- NULL
