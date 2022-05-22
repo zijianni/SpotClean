@@ -31,7 +31,7 @@
 #' mbrain_obj <- CreateSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' example_image_dir <- "path/to/image/dir"
-#' seurat_obj <- ConvertToSeurat(mbrain_obj, example_image_dir, "raw")
+#' seurat_obj <- convertToSeurat(mbrain_obj, example_image_dir, "raw")
 #' str(seurat_obj)
 #' }
 #'
@@ -41,7 +41,7 @@
 #' @importFrom S4Vectors metadata
 #' @export
 
-ConvertToSeurat <- function(slide_obj, image_dir,
+convertToSeurat <- function(slide_obj, image_dir,
                             slice="slice1",
                             filter_matrix=TRUE){
 

@@ -80,7 +80,7 @@ VisualizeHeatmap(decont_obj,metadata(decont_obj)$contamination_rate,
                  legend_range = c(0,1))
 
 # (Optionally) Transform to Seurat object for downstream analyses
-seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
+seurat_obj <- convertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 ```
 
 ## Working with the `SpatialExperiment` class
@@ -219,12 +219,12 @@ This indicates at least 5% expressions in observed data came from spot swapping 
 
 ## Convert to Seurat object for downstream analyses
 
-`ConvertToSeurat()` can be used to convert our slide object to a Seurat spatial object. Note that Seurat requires full input of the spatial folder. In the above example, this is the `spatial` folder.
+`convertToSeurat()` can be used to convert our slide object to a Seurat spatial object. Note that Seurat requires full input of the spatial folder. In the above example, this is the `spatial` folder.
 
 ```{r, eval=F}
 # Not run
 
-seurat_obj <- ConvertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
+seurat_obj <- convertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 ```
 
 # Session Information
