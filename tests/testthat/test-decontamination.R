@@ -7,7 +7,7 @@ mbrain_obj <- createSlide(mbrain_raw,
 # test output
 
 test_that("Decontamination",{
-    expect_silent(mbrain_decont_obj <- SpotClean(mbrain_obj, candidate_radius=20,
+    expect_silent(mbrain_decont_obj <- spotclean(mbrain_obj, candidate_radius=20,
                                                  maxit = 3, verbose = FALSE))
     expect_s4_class(mbrain_decont_obj,"SummarizedExperiment")
     expect_identical(names(mbrain_decont_obj@assays),"decont")
@@ -55,13 +55,13 @@ test_that("Internal computations", {
 
 # test input parameters
 test_that("Data loading", {
-    expect_error(SpotClean(mbrain_obj, gene_keep = "foo"),
+    expect_error(spotclean(mbrain_obj, gene_keep = "foo"),
                  "Specified genes not found")
 })
 
 names(mbrain_obj@assays) <- "decont"
 
 test_that("Wrong assay", {
-    expect_error(SpotClean(mbrain_obj, gene_keep = "foo"),
+    expect_error(spotclean(mbrain_obj, gene_keep = "foo"),
                  "Cannot find raw data")
 })

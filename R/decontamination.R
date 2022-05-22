@@ -42,19 +42,19 @@
 #' data(mbrain_slide_info)
 #' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
-#' mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
+#' mbrain_decont_obj <- spotclean(mbrain_obj, tol=10, candidate_radius=20)
 #' mbrain_decont_obj
 
 
-#' @rdname SpotClean
+#' @rdname spotclean
 #'
 #' @export
 
-SpotClean <- function(slide_obj, ...) {
+spotclean <- function(slide_obj, ...) {
     if(!class(slide_obj)%in%c("SummarizedExperiment","SpatialExperiment")){
         stop("Invalid slide object.")
     }
-    UseMethod(generic = "SpotClean", object = slide_obj)
+    UseMethod(generic = "spotclean", object = slide_obj)
 }
 
 #' @param gene_keep (vector of chr) Gene names to keep for decontamination.
@@ -92,12 +92,12 @@ SpotClean <- function(slide_obj, ...) {
 #' @importFrom methods as
 #' @importFrom SpatialExperiment spatialData scaleFactors spatialCoords
 #'
-#' @method SpotClean SummarizedExperiment
-#' @rdname SpotClean
+#' @method spotclean SummarizedExperiment
+#' @rdname spotclean
 #'
 #' @export
 
-SpotClean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
+spotclean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
                                            maxit=30, tol=1,
                                            candidate_radius=5*seq_len(6),
                                            kernel="gaussian",
@@ -136,12 +136,12 @@ SpotClean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
 #' Only applies to \code{SpatialExperiment} object.
 #' Default: 0.1.
 #'
-#' @method SpotClean SpatialExperiment
-#' @rdname SpotClean
+#' @method spotclean SpatialExperiment
+#' @rdname spotclean
 #'
 #' @export
 
-SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
+spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
                                         gene_cutoff=0.1,
                                         maxit=30, tol=1,
                                         candidate_radius=5*seq_len(6),

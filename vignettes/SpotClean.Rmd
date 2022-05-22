@@ -69,7 +69,7 @@ visualizeSlide(slide_obj = mbrain_obj)
 visualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
 
 # Decontaminate raw data
-decont_obj <- SpotClean(mbrain_obj)
+decont_obj <- spotclean(mbrain_obj)
 
 # Visualize decontaminated gene
 visualizeHeatmap(decont_obj,rownames(mbrain_raw)[1])
@@ -85,14 +85,14 @@ seurat_obj <- convertToSeurat(decont_obj,image_dir = "/path/to/spatial/folder")
 
 ## Working with the `SpatialExperiment` class
 
-[`SpatialExperiment`](https://bioconductor.org/packages/release/bioc/html/SpatialExperiment.html) is another widely used S4 class for storing ST data, including the count matrix, cell and gene-level metadata, and tissue image. `SpotClean()` can be directly applied to `SpatialExperiment` objects constructed from `SpatialExperiment::read10xVisium()`, which reads in the raw data from 10x Visium Space Ranger output. The visualization functions in our package currently do not support `SpatialExperiment` class, but there are alternative options such as [`ggspavis`](https://bioconductor.org/packages/release/bioc/html/ggspavis.html).
+[`SpatialExperiment`](https://bioconductor.org/packages/release/bioc/html/SpatialExperiment.html) is another widely used S4 class for storing ST data, including the count matrix, cell and gene-level metadata, and tissue image. `spotclean()` can be directly applied to `SpatialExperiment` objects constructed from `SpatialExperiment::read10xVisium()`, which reads in the raw data from 10x Visium Space Ranger output. The visualization functions in our package currently do not support `SpatialExperiment` class, but there are alternative options such as [`ggspavis`](https://bioconductor.org/packages/release/bioc/html/ggspavis.html).
 
 ```{r, eval=F}
 # Not run
 library(SpatialExperiment)
 slide_obj <- read10xVisium(samples = "/path/to/spaceranger/output/", 
                          data = "raw") # must specify data = "raw"
-decont_obj <- SpotClean(slide_obj)
+decont_obj <- spotclean(slide_obj)
 str(assays(decont_obj)$decont)
 ```
 
@@ -176,10 +176,10 @@ visualizeHeatmap(slide_obj,"Mbp")
 
 ## Decontaminate the data
 
-`SpotClean()` is the main function for performing decontamination. It takes the slide object of raw data as input together with some parameters for controlling optimization and convergence, and returns a slide object with decontaminated gene expressions and other model-related parameters and statistics appending to the slide information. Detailed parameter explanations can be found by running `?SpotClean`. Here we set `maxit=10` and `candidate_radius=20` to save computation time. In practice, `SpotClean()` by default evaluates a series of candidate radii and automatically chooses the best one. The default maximum number of iterations is 30, which can be extended if convergence has not been reached.
+`spotclean()` is the main function for performing decontamination. It takes the slide object of raw data as input together with some parameters for controlling optimization and convergence, and returns a slide object with decontaminated gene expressions and other model-related parameters and statistics appending to the slide information. Detailed parameter explanations can be found by running `?spotclean`. Here we set `maxit=10` and `candidate_radius=20` to save computation time. In practice, `spotclean()` by default evaluates a series of candidate radii and automatically chooses the best one. The default maximum number of iterations is 30, which can be extended if convergence has not been reached.
 
 ```{r}
-decont_obj <- SpotClean(slide_obj, maxit=10, candidate_radius = 20)
+decont_obj <- spotclean(slide_obj, maxit=10, candidate_radius = 20)
 ```
 
 Check the structure of output slide object:
