@@ -7,7 +7,7 @@
 #' and \code{label_col} must be specified.
 #'
 #' @param object A slide object created or
-#' inherited from \code{CreateSlide()}, or a \code{data.frame} of slide
+#' inherited from \code{createSlide()}, or a \code{data.frame} of slide
 #' information with columns: barcodes, tissue, imagerow, imagecol, etc.
 #'
 #' @param ... Arguments passed to other methods
@@ -18,7 +18,7 @@
 #'
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
-#' mbrain_obj <- CreateSlide(mbrain_raw,
+#' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' gp <- VisualizeHeatmap(mbrain_obj, "Bc1",
 #'                      title="mbrain", legend_title="Bc1 expression")

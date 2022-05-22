@@ -1,6 +1,6 @@
 data(mbrain_raw)
 data(mbrain_slide_info)
-mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 background_bcs <- dplyr::filter(mbrain_slide_info$slide,tissue==0)$barcode
 

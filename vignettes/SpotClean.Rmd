@@ -63,7 +63,7 @@ data(mbrain_raw)
 data(mbrain_slide_info)
 
 # Visualize raw data
-mbrain_obj <- CreateSlide(count_mat = mbrain_raw, 
+mbrain_obj <- createSlide(count_mat = mbrain_raw, 
                           slide_info = mbrain_slide_info)
 VisualizeSlide(slide_obj = mbrain_obj)
 VisualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
@@ -139,7 +139,7 @@ In the following, we will show the `SpotClean` workflow using the built-in examp
 We combine count matrix and slide metadata together as one single slide object with class `SummarizedExperiment`:
 
 ```{r}
-slide_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+slide_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 slide_obj
 ```
 

@@ -5,7 +5,7 @@
 #' following ggplot2's syntax.
 #'
 #' @param slide_obj A slide object created or inherited from
-#' \code{CreateSlide()}.
+#' \code{createSlide()}.
 #'
 #' @param title (chr) Title of the plot. Default: \code{""}
 #'
@@ -15,7 +15,7 @@
 #'
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
-#' mbrain_obj <- CreateSlide(mbrain_raw,
+#' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' gp <- VisualizeSlide(mbrain_obj)
 #' plot(gp)

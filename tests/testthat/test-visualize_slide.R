@@ -1,7 +1,7 @@
 data(mbrain_raw)
 data(mbrain_slide_info)
 
-mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 gp <- VisualizeSlide(mbrain_obj)
 

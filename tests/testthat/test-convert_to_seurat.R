@@ -1,7 +1,7 @@
 data(mbrain_raw)
 data(mbrain_slide_info)
 
-mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 test_that("Invalid image directory",{
     expect_error(convertToSeurat(mbrain_obj, "foo", "raw"),

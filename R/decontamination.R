@@ -4,13 +4,13 @@
 #' for decontaminating spot swapping effect in spatial transcriptomics data.
 #'
 #' @param slide_obj A slide object created or inherited from
-#' \code{CreateSlide()}, or a \code{SpatialExperiment} object created from
+#' \code{createSlide()}, or a \code{SpatialExperiment} object created from
 #' \code{SpatialExperiment::read10xVisium()}.
 #'
 #' @param ... Arguments passed to other methods
 #'
 #'
-#' @return For slide object created from \code{CreateSlide()}, returns a
+#' @return For slide object created from \code{createSlide()}, returns a
 #' slide object where the decontaminated expression matrix is in the
 #' "decont" assay slot and the contamination statistics are in
 #' metadata slots. Contamination statistics include ambient RNA contamination
@@ -40,7 +40,7 @@
 #'
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
-#' mbrain_obj <- CreateSlide(mbrain_raw,
+#' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' mbrain_decont_obj <- SpotClean(mbrain_obj, tol=10, candidate_radius=20)
 #' mbrain_decont_obj
@@ -123,7 +123,7 @@ SpotClean.SummarizedExperiment <- function(slide_obj, gene_keep=NULL,
 
     # create output
     metadata(slide_obj)$slide <- slide[slide$tissue==1,]
-    decont_obj <- CreateSlide(res$decont,
+    decont_obj <- createSlide(res$decont,
                               c(metadata(slide_obj),res$meta),
                               gene_cutoff = 0, verbose=FALSE)
     names(decont_obj@assays) <- "decont"

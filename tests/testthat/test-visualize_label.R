@@ -1,11 +1,11 @@
 data(mbrain_raw)
 data(mbrain_slide_info)
 
-mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 mbrain_slide_info2 <- mbrain_slide_info
 mbrain_slide_info2$slide <- head(mbrain_slide_info2$slide, 100)
-mbrain_obj2 <- CreateSlide(mbrain_raw[,mbrain_slide_info2$slide$barcode], mbrain_slide_info2)
+mbrain_obj2 <- createSlide(mbrain_raw[,mbrain_slide_info2$slide$barcode], mbrain_slide_info2)
 
 test_that("Non-existing column",{
     expect_error(VisualizeLabel(mbrain_obj, label="foo"),

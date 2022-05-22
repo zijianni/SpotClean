@@ -6,7 +6,7 @@
 #' Built based on Seurat's \code{Load10X_Spatial()}.
 #'
 #' @param slide_obj A slide object created or inherited from
-#' \code{CreateSlide()}.
+#' \code{createSlide()}.
 #'
 #' @param image_dir (chr) Path to directory with 10X Genomics visium image data;
 #' should include files \code{tissue_lowres_iamge.png},
@@ -28,7 +28,7 @@
 #' \dontrun{
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
-#' mbrain_obj <- CreateSlide(mbrain_raw,
+#' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
 #' example_image_dir <- "path/to/image/dir"
 #' seurat_obj <- convertToSeurat(mbrain_obj, example_image_dir, "raw")
