@@ -9,7 +9,7 @@
 #' \code{read10xRawH5()} is for reading 10x Space Ranger
 #' output HDF5 file (ended with .h5).
 #'
-#' \code{Read10xSlide()} is for reading slide
+#' \code{read10xSlide()} is for reading slide
 #' information (e.g. spot positions) and the tissue image from 10x
 #' Space Ranger outputs. This function is developed based on 10x's secondary
 #' analysis pipeline
@@ -57,7 +57,7 @@
 #' each row is a gene (feature) and each column is a spot barcode. If
 #' \code{meta = FALSE}, only returns the count matrix.
 #'
-#' \code{Read10xSlide()} returns a list of two objects. The first object, slide,
+#' \code{read10xSlide()} returns a list of two objects. The first object, slide,
 #' is a data.frame where each row corresponds to a spot
 #' and each column corresponds to slide information such as row and column
 #' positions on the slide. The second object, grob, is a Grid Graphical Object
@@ -216,7 +216,7 @@ read10xRawH5 <- function(h5_file,
 #'
 #' @export
 
-Read10xSlide <- function(tissue_csv_file,
+read10xSlide <- function(tissue_csv_file,
                          tissue_img_file = NULL,
                          scale_factor_file = NULL){
 

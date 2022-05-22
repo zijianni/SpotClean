@@ -39,7 +39,7 @@ VisualizeSlide <- function(slide_obj, title=""){
 
     if(is.null(grob)){
         stop("No valid image information. ",
-        "Check path to image file in Read10xSlide().")
+        "Check path to image file in read10xSlide().")
     }
 
     gp <- ggplot(slide, aes(x = imagecol, y = imagerow)) +

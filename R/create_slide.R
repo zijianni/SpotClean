@@ -2,7 +2,7 @@
 #'
 #' @description This function takes input of the count matrix
 #' (from \code{read10xRaw} or \code{read10xRawH5}) and slide information
-#' (from \code{Read10xSlide} or manually specified data frame) and outputs
+#' (from \code{read10xSlide} or manually specified data frame) and outputs
 #' a \code{SummarizedExperiment} object
 #' as our slide object for downstream decontamination and visualization.
 #'
@@ -11,7 +11,7 @@
 #' Can be either standard matrix format or sparse matrix format.
 #'
 #' @param slide_info (list or data.frame) A list of slide information from
-#' \code{Read10xSlide()}, or a data frame only containing spot information
+#' \code{read10xSlide()}, or a data frame only containing spot information
 #' like barcode, tissue, imagerow, imagecol, etc.
 #'
 #' @param gene_cutoff (num) Filter out genes with average expressions
