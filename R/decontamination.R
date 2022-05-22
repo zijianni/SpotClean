@@ -61,7 +61,7 @@ SpotClean <- function(slide_obj, ...) {
 #' We recommend not decontaminating lowly expressed and lowly variable genes
 #' in order to save computation time. Even if user include them, their
 #' decontaminated expressions will not change too much from raw expressions.
-#' When setting to \code{NULL}, \code{KeepHighGene()} will be
+#' When setting to \code{NULL}, \code{keepHighGene()} will be
 #' automatically called to filter out lowly expressed and lowly variable genes
 #' before decontamination.
 #' Default: \code{NULL}.
@@ -283,7 +283,7 @@ SpotClean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     # Keep highly expressed and highly variable genes
     mean_exp <- rowSums(raw_data)/length(ts_idx)
     if(is.null(gene_keep)){
-        gene_keep <- KeepHighGene(raw_ts_data, verbose=verbose)
+        gene_keep <- keepHighGene(raw_ts_data, verbose=verbose)
 
     }else{
         gene_keep <- intersect(gene_keep, rownames(raw_data))

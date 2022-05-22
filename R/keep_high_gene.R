@@ -35,7 +35,7 @@
 #' data(mbrain_raw)
 #' data(mbrain_slide_info)
 #' dim(mbrain_raw)
-#' mbrain_raw_f <- KeepHighGene(mbrain_raw, mean_cutoff=100,
+#' mbrain_raw_f <- keepHighGene(mbrain_raw, mean_cutoff=100,
 #'                              return_matrix=TRUE)
 #' dim(mbrain_raw_f)
 #'
@@ -46,7 +46,7 @@
 #' @export
 
 
-KeepHighGene <- function(count_mat, top_high=5000,
+keepHighGene <- function(count_mat, top_high=5000,
                          mean_cutoff=1, return_matrix=FALSE,
                          verbose=TRUE){
 
