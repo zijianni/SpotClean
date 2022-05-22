@@ -66,16 +66,16 @@ data(mbrain_slide_info)
 mbrain_obj <- createSlide(count_mat = mbrain_raw, 
                           slide_info = mbrain_slide_info)
 VisualizeSlide(slide_obj = mbrain_obj)
-VisualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
+visualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
 
 # Decontaminate raw data
 decont_obj <- SpotClean(mbrain_obj)
 
 # Visualize decontaminated gene
-VisualizeHeatmap(decont_obj,rownames(mbrain_raw)[1])
+visualizeHeatmap(decont_obj,rownames(mbrain_raw)[1])
 
 # Visualize the estimated per-spot contamination rate
-VisualizeHeatmap(decont_obj,metadata(decont_obj)$contamination_rate, 
+visualizeHeatmap(decont_obj,metadata(decont_obj)$contamination_rate, 
                  logged = FALSE, legend_title = "contamination rate",
                  legend_range = c(0,1))
 
@@ -160,19 +160,19 @@ VisualizeLabel(slide_obj,"tissue")
 ```
 
 
-Function `VisualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
+Function `visualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
-VisualizeHeatmap(slide_obj,"total_counts")
+visualizeHeatmap(slide_obj,"total_counts")
 ```
 
-You can also provide a certain gene name appearing in the raw count matrix in input slide object to `VisualizeHeatmap()`. For example, the expression of the Mbp gene can be visualized:
+You can also provide a certain gene name appearing in the raw count matrix in input slide object to `visualizeHeatmap()`. For example, the expression of the Mbp gene can be visualized:
 
 ```{r,fig.width=5, fig.height=4}
-VisualizeHeatmap(slide_obj,"Mbp")
+visualizeHeatmap(slide_obj,"Mbp")
 ```
 
-`VisualizeLabel()` and `VisualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `VisualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log-scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
+`VisualizeLabel()` and `visualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `visualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log-scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
 
 ## Decontaminate the data
 
@@ -194,7 +194,7 @@ The metadata now contains more information including parameter estimates from th
 We can visualize the Mbp gene expressions after 10 iterations of decontamination:
 
 ```{r,fig.width=5, fig.height=4}
-VisualizeHeatmap(decont_obj,"Mbp")
+visualizeHeatmap(decont_obj,"Mbp")
 ```
 
 ## Estimate contamination levels in observed data

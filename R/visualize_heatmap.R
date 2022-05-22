@@ -20,17 +20,17 @@
 #' data(mbrain_slide_info)
 #' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
-#' gp <- VisualizeHeatmap(mbrain_obj, "Bc1",
+#' gp <- visualizeHeatmap(mbrain_obj, "Bc1",
 #'                      title="mbrain", legend_title="Bc1 expression")
 #' plot(gp)
 
 
-#' @rdname VisualizeHeatmap
+#' @rdname visualizeHeatmap
 #'
 #' @export
 
-VisualizeHeatmap <- function(object, ...) {
-    UseMethod(generic = "VisualizeHeatmap", object = object)
+visualizeHeatmap <- function(object, ...) {
+    UseMethod(generic = "visualizeHeatmap", object = object)
 }
 
 
@@ -67,12 +67,12 @@ VisualizeHeatmap <- function(object, ...) {
 #'
 #' @importFrom methods as
 #'
-#' @method VisualizeHeatmap default
-#' @rdname VisualizeHeatmap
+#' @method visualizeHeatmap default
+#' @rdname visualizeHeatmap
 #'
 #' @export
 
-VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
+visualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
                                      subset_barcodes=NULL,
                                      logged=TRUE, viridis=TRUE,
                                      legend_range=NULL,
@@ -96,13 +96,13 @@ VisualizeHeatmap.default <- function(object, value, exp_matrix=NULL,
 }
 
 
-#' @method VisualizeHeatmap SummarizedExperiment
-#' @rdname VisualizeHeatmap
+#' @method visualizeHeatmap SummarizedExperiment
+#' @rdname visualizeHeatmap
 #' @importFrom SummarizedExperiment assay
 #' @importMethodsFrom S4Vectors metadata
 #' @export
 #'
-VisualizeHeatmap.SummarizedExperiment <- function(object, value,
+visualizeHeatmap.SummarizedExperiment <- function(object, value,
                                                   subset_barcodes=NULL,
                                                   logged=TRUE, viridis=TRUE,
                                                   legend_range=NULL,
