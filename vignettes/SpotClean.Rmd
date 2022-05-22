@@ -153,14 +153,14 @@ Our package provides multiple visualization functions in the 2-D slide space. Fu
 VisualizeSlide(slide_obj)
 ```
 
-Function `VisualizeLabel()` shows the spot labels. You can specify the column name of character labels in the `slide` metadata, or manually provide a vector of character labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been pre-stored in the input slide information:
+Function `visualizeLabel()` shows the spot labels. You can specify the column name of character labels in the `slide` metadata, or manually provide a vector of character labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
-VisualizeLabel(slide_obj,"tissue")
+visualizeLabel(slide_obj,"tissue")
 ```
 
 
-Function `visualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `VisualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
+Function `visualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `visualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot, which again has been pre-stored in the input slide information:
 
 ```{r,fig.width=5, fig.height=4}
 visualizeHeatmap(slide_obj,"total_counts")
@@ -172,7 +172,7 @@ You can also provide a certain gene name appearing in the raw count matrix in in
 visualizeHeatmap(slide_obj,"Mbp")
 ```
 
-`VisualizeLabel()` and `visualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `visualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log-scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
+`visualizeLabel()` and `visualizeHeatmap()` both support manual label/value inputs, subsetting spots to plot, title and legend name modification. `visualizeHeatmap()` also supports different color palettes (rainbow vs. viridis) and log-scaling options. These visualization functions return `ggplot2` objects, which can be further modified by users.
 
 ## Decontaminate the data
 

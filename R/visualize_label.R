@@ -20,16 +20,16 @@
 #' data(mbrain_slide_info)
 #' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
-#' gp <- VisualizeLabel(mbrain_obj, label="tissue",
+#' gp <- visualizeLabel(mbrain_obj, label="tissue",
 #'                      title="mbrain", legend_title="tissue or background")
 #' plot(gp)
 #'
-#' @rdname VisualizeLabel
+#' @rdname visualizeLabel
 #'
 #' @export
 
-VisualizeLabel <- function(object, ...) {
-    UseMethod(generic = "VisualizeLabel", object = object)
+visualizeLabel <- function(object, ...) {
+    UseMethod(generic = "visualizeLabel", object = object)
 }
 
 
@@ -54,12 +54,12 @@ VisualizeLabel <- function(object, ...) {
 
 #' @importFrom methods as
 #'
-#' @method VisualizeLabel default
-#' @rdname VisualizeLabel
+#' @method visualizeLabel default
+#' @rdname visualizeLabel
 #'
 #' @export
 
-VisualizeLabel.default <- function(object, label="tissue",
+visualizeLabel.default <- function(object, label="tissue",
                                    subset_barcodes=NULL, title="",
                                    legend_title=NULL, ...){
 
@@ -76,12 +76,12 @@ VisualizeLabel.default <- function(object, label="tissue",
 
 }
 
-#' @method VisualizeLabel SummarizedExperiment
-#' @rdname VisualizeLabel
+#' @method visualizeLabel SummarizedExperiment
+#' @rdname visualizeLabel
 #' @importFrom S4Vectors metadata
 #' @export
 #'
-VisualizeLabel.SummarizedExperiment <- function(object, label="tissue",
+visualizeLabel.SummarizedExperiment <- function(object, label="tissue",
                                                 subset_barcodes=NULL, title="",
                                                 legend_title=NULL, ...){
 
