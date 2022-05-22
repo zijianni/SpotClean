@@ -21,7 +21,7 @@ data.frame of the spatial information for spots. The second slot \code{grob}
 is a Grob object of the tissue image. The original dataset can be found at
 https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_Mouse_Brain.
 
-If users read raw data using \code{Read10xSlide}, they should get
+If users read raw data using \code{read10xSlide}, they should get
 exactly the same format as the objects in this dataset.
 }
 \examples{

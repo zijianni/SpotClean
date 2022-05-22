@@ -14,7 +14,7 @@ arcScore(object, ...)
 }
 \arguments{
 \item{object}{A gene-by-barcode count matrix or a slide object created or
-inherited from \code{CreateSlide()}.
+inherited from \code{createSlide()}.
 Ideally this should give the raw count matrix with all genes and barcodes
 without any filtering.}
 
@@ -59,7 +59,7 @@ data(mbrain_slide_info)
 background_bcs <- dplyr::filter(mbrain_slide_info$slide, tissue==0)$barcode
 arcScore(mbrain_raw, background_bcs)
 
-mbrain_obj <- CreateSlide(mbrain_raw, mbrain_slide_info)
+mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 arcScore(mbrain_obj)
 
 }

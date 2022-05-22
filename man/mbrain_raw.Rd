@@ -20,7 +20,7 @@ https://support.10xgenomics.com/spatial-gene-expression/datasets/1.0.0/V1_Adult_
 For simplicity, we only keep the top 100 highest expressed genes in this
 example data.
 
-If users read raw data using \code{Read10xRaw} (or \code{Read10xRawH5}),
+If users read raw data using \code{read10xRaw} (or \code{read10xRawH5}),
 they should get exactly the same format as the object in this dataset.
 }
 \examples{
