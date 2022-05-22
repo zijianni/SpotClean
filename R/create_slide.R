@@ -1,7 +1,7 @@
 #' @title Create a new slide object
 #'
 #' @description This function takes input of the count matrix
-#' (from \code{Read10xRaw} or \code{Read10xRawH5}) and slide information
+#' (from \code{read10xRaw} or \code{read10xRawH5}) and slide information
 #' (from \code{Read10xSlide} or manually specified data frame) and outputs
 #' a \code{SummarizedExperiment} object
 #' as our slide object for downstream decontamination and visualization.

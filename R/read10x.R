@@ -1,12 +1,12 @@
-#' @name Read10xRaw
+#' @name read10xRaw
 #'
 #' @title Read 10x Space Ranger output data
 #'
-#' @description \code{Read10xRaw()} is a one-line handy function for reading
+#' @description \code{read10xRaw()} is a one-line handy function for reading
 #' the raw expression data from 10x Space Ranger outputs and producing a count
 #' matrix as an R object.
 #'
-#' \code{Read10xRawH5()} is for reading 10x Space Ranger
+#' \code{read10xRawH5()} is for reading 10x Space Ranger
 #' output HDF5 file (ended with .h5).
 #'
 #' \code{Read10xSlide()} is for reading slide
@@ -43,14 +43,14 @@
 #' as row names of the count matrix.
 #' Default: \code{row_name = "symbol"}
 #'
-#' @param meta (logical) If \code{TRUE}, \code{Read10xRaw} or
-#' \code{Read10xRawH5} returns a list containing both the
+#' @param meta (logical) If \code{TRUE}, \code{read10xRaw} or
+#' \code{read10xRawH5} returns a list containing both the
 #' count matrix and metadata of genes (features). Metadata includes feature
 #' names, IDs and other additional information depending on Space Ranger
 #' output. If \code{FALSE}, only returns the count matrix.
 #' Default: \code{FALSE}
 #'
-#' @return If \code{meta = TRUE}, \code{Read10xRaw()} or \code{Read10xRawH5()}
+#' @return If \code{meta = TRUE}, \code{read10xRaw()} or \code{read10xRawH5()}
 #' returns a list of two elements: a
 #' "dgCMatrix" sparse matrix containing expression counts and a data
 #' frame containing metadata of genes (features). For the count matrix,
@@ -90,7 +90,7 @@
 #'
 #' # read files
 #' list.files(data_dir)
-#' mbrain_raw_new <- Read10xRaw(data_dir)
+#' mbrain_raw_new <- read10xRaw(data_dir)
 #' str(mbrain_raw_new)
 #' identical(mbrain_raw, mbrain_raw_new)
 
@@ -103,7 +103,7 @@
 #'
 #' @export
 
-Read10xRaw <- function(count_dir = NULL,
+read10xRaw <- function(count_dir = NULL,
                     row_name = "symbol",
                     meta = FALSE) {
     if(is.null(count_dir)){
@@ -163,7 +163,7 @@ Read10xRaw <- function(count_dir = NULL,
 #'
 #' @export
 
-Read10xRawH5 <- function(h5_file,
+read10xRawH5 <- function(h5_file,
                     row_name = "symbol",
                     meta = FALSE) {
 

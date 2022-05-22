@@ -30,16 +30,16 @@ close(gene_dir)
 # test reading function
 
 test_that("Directory/files existence", {
-    expect_error(Read10xRaw(paste0(data_dir,"/foo")),
+    expect_error(read10xRaw(paste0(data_dir,"/foo")),
                  "Directory does not exist")
-    expect_error(Read10xRaw(tempdir()), "No 10x output file detected")
+    expect_error(read10xRaw(tempdir()), "No 10x output file detected")
 })
 
 test_that("Data loading", {
-    expect_identical(Read10xRaw(data_dir), mbrain_raw)
+    expect_identical(read10xRaw(data_dir), mbrain_raw)
 })
 
 
 test_that("Metadata loading", {
-    expect_true(is.list(Read10xRaw(data_dir, meta = TRUE)))
+    expect_true(is.list(read10xRaw(data_dir, meta = TRUE)))
 })
