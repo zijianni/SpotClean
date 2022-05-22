@@ -65,7 +65,7 @@ data(mbrain_slide_info)
 # Visualize raw data
 mbrain_obj <- createSlide(count_mat = mbrain_raw, 
                           slide_info = mbrain_slide_info)
-VisualizeSlide(slide_obj = mbrain_obj)
+visualizeSlide(slide_obj = mbrain_obj)
 visualizeHeatmap(mbrain_obj,rownames(mbrain_raw)[1])
 
 # Decontaminate raw data
@@ -147,10 +147,10 @@ As shown above, the raw count matrix is stored in the `raw` assay slot, and slid
 
 ## Visualize the slide object
 
-Our package provides multiple visualization functions in the 2-D slide space. Function `VisualizeSlide()` shows the input slide imaging file (if given) in R:
+Our package provides multiple visualization functions in the 2-D slide space. Function `visualizeSlide()` shows the input slide imaging file (if given) in R:
 
 ```{r,fig.width=5, fig.height=5}
-VisualizeSlide(slide_obj)
+visualizeSlide(slide_obj)
 ```
 
 Function `visualizeLabel()` shows the spot labels. You can specify the column name of character labels in the `slide` metadata, or manually provide a vector of character labels corresponding to each spot. For example, we can plot their tissue/background labels, which has been pre-stored in the input slide information:

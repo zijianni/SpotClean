@@ -17,7 +17,7 @@
 #' data(mbrain_slide_info)
 #' mbrain_obj <- createSlide(mbrain_raw,
 #'                           mbrain_slide_info)
-#' gp <- VisualizeSlide(mbrain_obj)
+#' gp <- visualizeSlide(mbrain_obj)
 #' plot(gp)
 
 
@@ -29,7 +29,7 @@
 #'
 #' @export
 
-VisualizeSlide <- function(slide_obj, title=""){
+visualizeSlide <- function(slide_obj, title=""){
 
     # junk code... get rid of R CMD check notes
     imagerow <- imagecol <- NULL
