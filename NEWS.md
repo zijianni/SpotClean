@@ -22,3 +22,9 @@
 ---------------------
 
 * Submitted to Bioconductor for review
+
+## SpotClean 0.99.8
+
+---------------------
+
+* First round review
