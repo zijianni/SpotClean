@@ -1,7 +1,16 @@
-# Simulate 10x output files
-
 data(mbrain_raw)
-data(mbrain_slide_info)
+spatial_dir <- system.file(file.path("extdata",
+                                     "V1_Adult_Mouse_Brain_spatial"),
+                           package = "SpotClean")
+mbrain_slide_info <- read10xSlide(
+    tissue_csv_file=file.path(spatial_dir,
+                              "tissue_positions_list.csv"),
+    tissue_img_file = file.path(spatial_dir,
+                                "tissue_lowres_image.png"),
+    scale_factor_file = file.path(spatial_dir,
+                                  "scalefactors_json.json"))
+
+# Simulate 10x output files
 
 data_dir <- file.path(tempdir(),"sim_example")
 if(dir.exists(data_dir)){
@@ -42,4 +51,10 @@ test_that("Data loading", {
 
 test_that("Metadata loading", {
     expect_true(is.list(read10xRaw(data_dir, meta = TRUE)))
+})
+
+# test reading slide metadata
+test_that("Metadata loading", {
+    expect_identical(mbrain_slide_info$slide[1,1], "ACGCCTGACACGCGCT-1")
+    expect_equal(mbrain_slide_info$slide[1,5], 63.84281593)
 })
