@@ -55,6 +55,8 @@ library(S4Vectors)
 
 Here we quickly demonstrate the general SpotClean workflow on the built-in example data. A step-by-step illustration can be found in the next section.
 
+Note: codes in this chunk are only for illustrative purpose and are not runnable. Runnable codes can be found in the next section.
+
 ```{r, eval=FALSE}
 # Not run
 
