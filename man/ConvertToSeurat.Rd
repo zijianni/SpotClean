@@ -34,14 +34,24 @@ Built based on Seurat's \code{Load10X_Spatial()}.
 }
 \examples{
 
-\dontrun{
+# load count matrix and slide metadata
 data(mbrain_raw)
-data(mbrain_slide_info)
+spatial_dir <- system.file(file.path("extdata",
+                                     "V1_Adult_Mouse_Brain_spatial"),
+                           package = "SpotClean")
+mbrain_slide_info <- read10xSlide(tissue_csv_file=file.path(spatial_dir,
+                                       "tissue_positions_list.csv"),
+             tissue_img_file = file.path(spatial_dir,
+                                       "tissue_lowres_image.png"),
+             scale_factor_file = file.path(spatial_dir,
+                                       "scalefactors_json.json"))
+
+# Create slide object
 mbrain_obj <- createSlide(mbrain_raw,
                           mbrain_slide_info)
-example_image_dir <- "path/to/image/dir"
-seurat_obj <- convertToSeurat(mbrain_obj, example_image_dir, "raw")
+
+# Convert to Seurat object
+seurat_obj <- convertToSeurat(mbrain_obj, spatial_dir, "raw")
 str(seurat_obj)
-}
 
 }

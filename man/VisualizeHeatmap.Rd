@@ -84,9 +84,18 @@ and \code{label_col} must be specified.
 \examples{
 
 data(mbrain_raw)
-data(mbrain_slide_info)
+spatial_dir <- system.file(file.path("extdata",
+                                     "V1_Adult_Mouse_Brain_spatial"),
+                           package = "SpotClean")
+mbrain_slide_info <- read10xSlide(tissue_csv_file=file.path(spatial_dir,
+                                       "tissue_positions_list.csv"),
+             tissue_img_file = file.path(spatial_dir,
+                                       "tissue_lowres_image.png"),
+             scale_factor_file = file.path(spatial_dir,
+                                       "scalefactors_json.json"))
 mbrain_obj <- createSlide(mbrain_raw,
                           mbrain_slide_info)
+
 gp <- visualizeHeatmap(mbrain_obj, "Bc1",
                      title="mbrain", legend_title="Bc1 expression")
 plot(gp)
