@@ -1,17 +1,28 @@
 data(mbrain_raw)
-data(mbrain_slide_info)
+spatial_dir <- system.file(file.path("extdata",
+                                     "V1_Adult_Mouse_Brain_spatial"),
+                           package = "SpotClean")
+mbrain_slide_info <- read10xSlide(
+    tissue_csv_file=file.path(spatial_dir,
+                              "tissue_positions_list.csv"),
+    tissue_img_file = file.path(spatial_dir,
+                                "tissue_lowres_image.png"),
+    scale_factor_file = file.path(spatial_dir,
+                                  "scalefactors_json.json"))
 
 mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 mbrain_slide_info2 <- mbrain_slide_info
 mbrain_slide_info2$slide <- head(mbrain_slide_info2$slide, 100)
-mbrain_obj2 <- createSlide(mbrain_raw[,mbrain_slide_info2$slide$barcode], mbrain_slide_info2)
+mbrain_obj2 <- createSlide(mbrain_raw[,mbrain_slide_info2$slide$barcode],
+                           mbrain_slide_info2)
 
 
 test_that("Non-existing gene",{
     expect_error(visualizeHeatmap(mbrain_obj, value="foo"),
                  "Specified gene does not exist")
-    expect_error(visualizeHeatmap(mbrain_slide_info$slide, value="foo",mbrain_raw),
+    expect_error(visualizeHeatmap(mbrain_slide_info$slide,
+                                  value="foo",mbrain_raw),
                  "Specified gene does not exist")
 
 })
