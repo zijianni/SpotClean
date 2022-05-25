@@ -65,9 +65,8 @@
 #'
 #' @examples
 #'
-#' # simulate 10x output files
+#' # simulate 10x output files of count matrix
 #' data(mbrain_raw)
-#' data(mbrain_slide_info)
 #' data_dir <- file.path(tempdir(),"sim_example")
 #' dir.create(data_dir)
 #' matrix_dir <- file.path(data_dir,"matrix.mtx")
@@ -88,11 +87,24 @@
 #' close(gene_dir)
 #'
 #'
-#' # read files
+#' # read expression count matrix
 #' list.files(data_dir)
 #' mbrain_raw_new <- read10xRaw(data_dir)
 #' str(mbrain_raw_new)
 #' identical(mbrain_raw, mbrain_raw_new)
+#'
+#' # read slide metadata
+#' spatial_dir <- system.file(file.path("extdata",
+#'                                      "V1_Adult_Mouse_Brain_spatial"),
+#'                            package = "SpotClean")
+#' list.files(spatial_dir)
+#' mbrain_slide_info <- read10xSlide(tissue_csv_file=file.path(spatial_dir,
+#'                                        "tissue_positions_list.csv"),
+#'              tissue_img_file = file.path(spatial_dir,
+#'                                        "tissue_lowres_image.png"),
+#'              scale_factor_file = file.path(spatial_dir,
+#'                                        "scalefactors_json.json"))
+#' str(mbrain_slide_info)
 
 
 #' @rdname Read10x
