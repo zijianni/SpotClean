@@ -1,5 +1,4 @@
 data(mbrain_raw)
-data(mbrain_slide_info)
 
 mbrain_filter <- keepHighGene(mbrain_raw, return_matrix=TRUE)
 

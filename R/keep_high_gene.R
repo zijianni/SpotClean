@@ -32,9 +32,10 @@
 #' matrix with the same class as \code{count_mat}.
 #'
 #' @examples
+#'
 #' data(mbrain_raw)
-#' data(mbrain_slide_info)
 #' dim(mbrain_raw)
+#'
 #' mbrain_raw_f <- keepHighGene(mbrain_raw, mean_cutoff=100,
 #'                              return_matrix=TRUE)
 #' dim(mbrain_raw_f)
