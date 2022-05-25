@@ -98,13 +98,11 @@ visualizeLabel.SummarizedExperiment <- function(object, label="tissue",
 #' @importFrom ggplot2 xlab ylab ggtitle labs guides guide_legend
 #' @importFrom ggplot2 theme_set theme_bw theme element_blank element_line
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #'
 .visualize_label <- function(slide, label="tissue",
                              subset_barcodes=NULL, title="",
                              legend_title=NULL, ...){
-
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- barcode <- NULL
 
     # manipulate label to plot
     if(length(label)==1){
@@ -129,11 +127,12 @@ visualizeLabel.SummarizedExperiment <- function(object, label="tissue",
 
     # subsetting barcodes
     if(!is.null(subset_barcodes)){
-        slide <- filter(slide, barcode%in%subset_barcodes)
+        slide <- filter(slide, .data$barcode%in%subset_barcodes)
     }
 
     # plot
-    gp <- ggplot(slide, aes(x=imagecol,y=imagerow, fill=factor(label))) +
+    gp <- ggplot(slide, aes(x=.data$imagecol,y=.data$imagerow,
+                            fill=factor(.data$label))) +
         geom_point(shape = 21, size = 1.75, color="white")+
         coord_cartesian(expand=FALSE)+
         xlim(0,max(slide$width))+

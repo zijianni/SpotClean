@@ -11,7 +11,7 @@ convertToSeurat(slide_obj, image_dir, slice = "slice1", filter_matrix = TRUE)
 \code{createSlide()}.}
 
 \item{image_dir}{(chr) Path to directory with 10X Genomics visium image data;
-should include files \code{tissue_lowres_iamge.png},
+should include files \code{tissue_lowres_image.png},
 \code{scalefactors_json.json} and \code{tissue_positions_list.csv}.}
 
 \item{slice}{(chr) Name for the stored image of the tissue slice.

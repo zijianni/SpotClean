@@ -26,13 +26,11 @@
 #' @importFrom ggplot2 theme element_blank element_line
 #' @importFrom tibble tibble
 #' @importFrom S4Vectors metadata
+#' @importFrom rlang .data
 #'
 #' @export
 
 visualizeSlide <- function(slide_obj, title=""){
-
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- NULL
 
     slide <- metadata(slide_obj)$slide
     grob <- metadata(slide_obj)$grob
@@ -42,7 +40,7 @@ visualizeSlide <- function(slide_obj, title=""){
         "Check path to image file in read10xSlide().")
     }
 
-    gp <- ggplot(slide, aes(x = imagecol, y = imagerow)) +
+    gp <- ggplot(slide, aes(x = .data$imagecol, y = .data$imagerow)) +
         .geom_spatial(data = tibble(grob=list(grob)),
                       aes(grob = grob),
                       x = 0.5,

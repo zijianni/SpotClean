@@ -27,7 +27,8 @@ Imports:
     viridis,
     grDevices,
     RColorBrewer,
-    Seurat
+    Seurat,
+    rlang
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

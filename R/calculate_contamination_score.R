@@ -95,15 +95,13 @@ arcScore.default <- function(object, background_bcs, ...){
 #' @importFrom SummarizedExperiment assay
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #'
 #' @export
 #'
 arcScore.SummarizedExperiment <- function(object, ...){
 
-    # junk code... get rid of R CMD check notes
-    tissue <- NULL
-
-    background_bcs <- filter(metadata(object)$slide,tissue==0)$barcode
+    background_bcs <- filter(metadata(object)$slide, .data$tissue==0)$barcode
     count_mat <- assay(object)
 
     total_counts <- colSums(count_mat)

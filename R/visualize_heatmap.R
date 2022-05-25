@@ -126,6 +126,7 @@ visualizeHeatmap.SummarizedExperiment <- function(object, value,
 #' @importFrom ggplot2 xlab ylab ggtitle labs theme_set theme_bw
 #' @importFrom ggplot2 theme element_blank element_line
 #' @importFrom dplyr filter
+#' @importFrom rlang .data
 #'
 .visualize_heatmap <- function(slide, value, exp_mat=NULL,
                                subset_barcodes=NULL,
@@ -133,8 +134,6 @@ visualizeHeatmap.SummarizedExperiment <- function(object, value,
                                legend_range=NULL,
                                title="", legend_title=NULL,
                                ...){
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- barcode <- NULL
 
     # manipulate value to plot
     if(length(value)==1 & is.character(value)){
@@ -177,7 +176,7 @@ visualizeHeatmap.SummarizedExperiment <- function(object, value,
 
     # subsetting barcodes
     if(!is.null(subset_barcodes)){
-        slide <- filter(slide, barcode%in%subset_barcodes)
+        slide <- filter(slide, .data$barcode%in%subset_barcodes)
     }
 
     # setup legend breaks
@@ -212,7 +211,8 @@ visualizeHeatmap.SummarizedExperiment <- function(object, value,
     }
 
     # plot
-    gp <- ggplot(slide_show, aes(x = imagecol, y = imagerow, fill = value)) +
+    gp <- ggplot(slide_show, aes(x = .data$imagecol,
+                                 y = .data$imagerow, fill = .data$value)) +
         geom_point(
             shape = 21,
             colour = "white",

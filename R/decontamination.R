@@ -91,6 +91,7 @@ spotclean <- function(slide_obj, ...) {
 #' @importFrom stats dist quantile optim cor lm coef
 #' @importFrom methods as
 #' @importFrom SpatialExperiment spatialData scaleFactors spatialCoords
+#' @importFrom rlang .data
 #'
 #' @method spotclean SummarizedExperiment
 #' @rdname spotclean
@@ -254,7 +255,7 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
 
     # Euclidean distance matrix for spots
     slide_distance <- .calculate_euclidean_weight(
-        select(slide, imagerow, imagecol)
+        select(slide, .data$imagerow, .data$imagecol)
     )
     rownames(slide_distance) <- colnames(slide_distance) <- slide$barcode
 
@@ -262,9 +263,6 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     I1_y <- matrix(1,n_spots,length(ts_idx))
     I1_yy <- matrix(1,length(ts_idx),length(ts_idx))
     I_yy <- diag(length(ts_idx))
-
-    # junk code... get rid of R CMD check notes
-    imagerow <- imagecol <- tissue <- NULL
 
     # calculate ARC score
     ARC_score <- arcScore(raw_data,
