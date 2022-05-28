@@ -23,7 +23,7 @@ devtools::install_github("zijianni/SpotClean", build_manual = TRUE, build_vignet
 
 ```
 
-Install the Bioconductor version (coming soon):
+Install the Bioconductor version:
 
 ```{r}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -51,7 +51,7 @@ vignette("SpotClean")
 
 We appreciate it if you could cite our work when using `SpotClean`:
 
-Ni, Z., Prasad, A., Chen, S., Arkin, L., Halberg, R., Drolet, B., Newton, M., Kendziorski, C. (2021). SpotClean adjusts for spot swapping in spatial transcriptomics data. *bioRxiv*. https://doi.org/10.1101/2021.06.11.448105
+Ni, Z., Prasad, A., Chen, S. et al. SpotClean adjusts for spot swapping in spatial transcriptomics data. *Nat Commun* 13, 2971 (2022). https://doi.org/10.1038/s41467-022-30587-y
 
 A BibTeX entry for LaTeX users can be found by running 
 

@@ -34,3 +34,9 @@
 ---------------------
 
 * Second round review
+
+## SpotClean 0.99.10
+
+---------------------
+
+* Our paper is published in Nature Communications!
