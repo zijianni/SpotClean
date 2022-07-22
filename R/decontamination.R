@@ -479,7 +479,7 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
 .kernel_list <- list(gaussian=.gaussian_kernel,
                      linear=.linear_kernel,
                      laplace=.laplace_kernel,
-                     caucky=.cauchy_kernel)
+                     cauchy=.cauchy_kernel)
 
 .local_kernel <- function(x, sigma, kernel){
     if(kernel=="linear"){
