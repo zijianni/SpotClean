@@ -23,7 +23,8 @@
 #' (ended with .h5).
 #'
 #' @param tissue_csv_file (chr) The path of 10x output CSV file of
-#' spot positions, usually named \code{tissue_positions_list.csv}.
+#' spot positions, usually named \code{tissue_positions_list.csv} for 
+#' Space Ranger V1 and \code{tissue_positions.csv} for Space Ranger V2.
 #'
 #' @param tissue_img_file (chr) The path of the 10x output low resolution
 #' tissue image in PNG format,
@@ -116,8 +117,8 @@
 #' @export
 
 read10xRaw <- function(count_dir = NULL,
-                    row_name = "symbol",
-                    meta = FALSE) {
+                       row_name = "symbol",
+                       meta = FALSE) {
     if(is.null(count_dir)){
         count_dir <- getwd()
     }
@@ -127,23 +128,23 @@ read10xRaw <- function(count_dir = NULL,
         stop("Directory does not exist.")
     count_dir <- gsub("/$", "", count_dir)
     fname <- list.files(count_dir)
-
+    
     # Path to files
-
+    
     if(!all(c("barcodes.tsv.gz","features.tsv.gz",
-            "matrix.mtx.gz")%in%fname)){
+              "matrix.mtx.gz")%in%fname)){
         stop("No 10x output file detected.")
     }
     Barcode <- file.path(count_dir, "barcodes.tsv.gz")
     Gene <- file.path(count_dir, "features.tsv.gz")
     CountMat <- file.path(count_dir, "matrix.mtx.gz")
-
+    
     # Read gene and barcode info
-
+    
     barcode <- readLines(Barcode)
     gene.meta <- read.delim(Gene, header = FALSE, colClasses = "character")
     colnames(gene.meta) <- c("id", "symbol", "type")
-
+    
     if (row_name == "symbol") {
         #gene names as row names of count matrix
         gene <- gene.meta$symbol
@@ -151,13 +152,13 @@ read10xRaw <- function(count_dir = NULL,
         #gene ids as row names of count matrix
         gene <- gene.meta$id
     }
-
+    
     # Read count matrix
-
+    
     countmat <- as(readMM(CountMat), "dgCMatrix")
     colnames(countmat) <- barcode
     rownames(countmat) <- make.unique(gene)
-
+    
     if (meta) {
         #return a list including count matrix and gene metadata
         return(list(CountMatrix = countmat, Metadata = gene.meta))
@@ -176,20 +177,20 @@ read10xRaw <- function(count_dir = NULL,
 #' @export
 
 read10xRawH5 <- function(h5_file,
-                    row_name = "symbol",
-                    meta = FALSE) {
-
+                         row_name = "symbol",
+                         meta = FALSE) {
+    
     if (!row_name %in% c("symbol", "id"))
         stop("row_name should be either \"symbol\" or \"id\".")
     if (!file.exists(h5_file))
         stop("File does not exist.")
-
+    
     fname <- h5ls(h5_file)
-
+    
     data.temp <-  h5read(h5_file, "/matrix")
     barcode <- data.temp$barcodes
     gene.meta <- data.temp$features
-
+    
     if (row_name == "symbol") {
         #gene names as row names of count matrix
         gene <- gene.meta$name
@@ -197,7 +198,7 @@ read10xRawH5 <- function(h5_file,
         #gene ids as row names of count matrix
         gene <- gene.meta$id
     }
-
+    
     countmat <-
         sparseMatrix(
             i = data.temp$indices,
@@ -208,7 +209,7 @@ read10xRawH5 <- function(h5_file,
         )
     colnames(countmat) <- as.vector(barcode)
     rownames(countmat) <- make.unique(gene)
-
+    
     if (meta) {
         #return a list including count matrix and gene metadata
         return(list(CountMatrix = countmat, Metadata = gene.meta))
@@ -216,7 +217,7 @@ read10xRawH5 <- function(h5_file,
         #only return count matrix
         return(countmat)
     }
-
+    
 }
 
 #' @rdname Read10x
@@ -231,35 +232,44 @@ read10xRawH5 <- function(h5_file,
 read10xSlide <- function(tissue_csv_file,
                          tissue_img_file = NULL,
                          scale_factor_file = NULL){
-
+    
     # Load tissue information
     slide <- read.csv(tissue_csv_file,
                       col.names=c("barcode","tissue","row",
                                   "col","imagerow","imagecol"),
                       header = FALSE)
+    
+    # For Space Ranger V2, re-read CSV with header=TRUE
+    if(inherits(slide$tissue,"character")){
+        slide <- read.csv(tissue_csv_file,
+                          col.names=c("barcode","tissue","row",
+                                      "col","imagerow","imagecol"),
+                          header = TRUE)
+    }
+    
     slide$tissue <- as.factor(slide$tissue)
-
+    
     grob <- NULL
     # Load tissue image
     if(!is.null(tissue_img_file)){
-
+        
         # Load downsampled image
         tissue_img_file <- read.bitmap(tissue_img_file)
-
+        
         grob <- rasterGrob(tissue_img_file,
                            width=unit(1,"npc"),
                            height=unit(1,"npc"))
-
+        
         slide$height <- nrow(tissue_img_file)
         slide$width <- ncol(tissue_img_file)
     }
-
+    
     # Load scale factor
     if(!is.null(scale_factor_file)){
         scales <- rjson::fromJSON(file = scale_factor_file)
         slide$imagerow <- slide$imagerow * scales$tissue_lowres_scalef
         slide$imagecol <- slide$imagecol * scales$tissue_lowres_scalef
     }
-
+    
     return(list(slide=slide, grob=grob))
 }

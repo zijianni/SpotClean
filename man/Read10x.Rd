@@ -33,7 +33,8 @@ Default: \code{FALSE}}
 (ended with .h5).}
 
 \item{tissue_csv_file}{(chr) The path of 10x output CSV file of
-spot positions, usually named \code{tissue_positions_list.csv}.}
+spot positions, usually named \code{tissue_positions_list.csv} for 
+Space Ranger V1 and \code{tissue_positions.csv} for Space Ranger V2.}
 
 \item{tissue_img_file}{(chr) The path of the 10x output low resolution
 tissue image in PNG format,
