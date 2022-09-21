@@ -155,7 +155,7 @@ read10xRaw <- function(count_dir = NULL,
     
     # Read count matrix
     
-    countmat <- as(readMM(CountMat), "dgCMatrix")
+    countmat <- as(readMM(CountMat), "CsparseMatrix")
     colnames(countmat) <- barcode
     rownames(countmat) <- make.unique(gene)
     

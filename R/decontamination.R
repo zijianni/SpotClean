@@ -389,7 +389,7 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
                              raw_ts_data[gene_notkeep,, drop=FALSE]*scale_ratio)
     }
 
-    decont_data <- as(decont_data[rownames(raw_data),],"dgCMatrix")
+    decont_data <- as(decont_data[rownames(raw_data),],"CsparseMatrix")
 
     # Calculation contamination rate in each tissue spot
     decont_total_counts <- colSums(decont_data)

@@ -78,7 +78,7 @@ arcScore.default <- function(object, background_bcs, ...){
         object <- as(object = as.matrix(x = object), Class = 'Matrix')
     }
     if (!inherits(x = object, what = 'dgCMatrix')) {
-        object <- as(object = object, Class = 'dgCMatrix')
+        object <- as(object = object, Class = 'CsparseMatrix')
     }
 
     if(!all(background_bcs%in%colnames(object))){
