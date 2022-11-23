@@ -40,3 +40,9 @@
 ---------------------
 
 * Our paper is published in Nature Communications!
+
+## SpotClean 1.0.1
+
+---------------------
+
+* Fixed a bug due to updated slots in SpatialExperiment objects

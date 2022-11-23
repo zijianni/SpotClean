@@ -93,13 +93,13 @@ spotclean <- function(slide_obj, ...) {
 #' Default: \code{TRUE}
 
 #' @import Matrix
-#' @importFrom SummarizedExperiment assays SummarizedExperiment assays<-
+#' @importFrom SummarizedExperiment assays colData SummarizedExperiment assays<-
 #' @importMethodsFrom S4Vectors metadata metadata<-
 #' @importFrom utils txtProgressBar setTxtProgressBar
 #' @importFrom dplyr filter select rename
 #' @importFrom stats dist quantile optim cor lm coef
 #' @importFrom methods as
-#' @importFrom SpatialExperiment spatialData scaleFactors spatialCoords
+#' @importFrom SpatialExperiment scaleFactors spatialCoords
 #' @importFrom rlang .data
 #'
 #' @method spotclean SummarizedExperiment
@@ -162,13 +162,13 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
                      candidate_radius, kernel, verbose)
 
     # raw data matrix
-    raw_data <- assays(slide_obj)$counts
+    raw_data <- as(object = assays(slide_obj)$counts, Class = 'CsparseMatrix')
     if(is.null(raw_data)){
         stop("Cannot find raw data in input slide object.")
     }
 
     # collect spot info from the SpatialExperiment object
-    slide <- data.frame(spatialData(slide_obj))
+    slide <- data.frame(colData(slide_obj))
     slide <- rename(slide, tissue="in_tissue", row="array_row", col="array_col")
     slide$barcode <- rownames(slide)
     slide$tissue <- factor(as.integer(slide$tissue))
