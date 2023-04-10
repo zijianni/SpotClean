@@ -179,7 +179,7 @@ visualizeLabel(slide_obj,"tissue")
 Function `visualizeHeatmap()` draws a heatmap of values at every spot in the 2-D slide space. Similar to `visualizeLabel()`, you can specify the column name of numerical values in the `slide` metadata, or manually provide a vector of numerical values corresponding to each spot. For example, we can plot the total UMI counts in every spot,:
 
 ```{r,fig.width=5, fig.height=4}
-metadata(slide_obj)$slide$total_counts <- colSums(mbrain_raw)
+metadata(slide_obj)$slide$total_counts <- Matrix::colSums(mbrain_raw)
 visualizeHeatmap(slide_obj,"total_counts")
 ```
 
