@@ -46,3 +46,9 @@
 ---------------------
 
 * Fixed a bug due to updated slots in SpatialExperiment objects
+
+## SpotClean 1.1.2
+
+---------------------
+
+* Fixed a bug in vignettes for column sum on sparse matrix.
