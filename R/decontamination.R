@@ -264,7 +264,7 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
 
     # Euclidean distance matrix for spots
     slide_distance <- .calculate_euclidean_weight(
-        select(slide, .data$imagerow, .data$imagecol)
+        select(slide, "imagerow", "imagecol")
     )
     rownames(slide_distance) <- colnames(slide_distance) <- slide$barcode
 
