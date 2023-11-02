@@ -71,8 +71,25 @@ createSlide <- function(count_mat, slide_info, gene_cutoff=0.1, verbose=TRUE){
     if(!identical(sort(colnames(count_mat)),
                  sort(slide_info$slide$barcode)
                  )){
-        stop("Barcodes in count matrix do not match ",
+        warning("Barcodes in count matrix do not match ",
              "barcodes in slide information.")
+        
+        # https://github.com/zijianni/SpotClean/issues/15
+        # filter out barcodes in count matrix but not in slide info
+        unique_mat_bc = !colnames(count_mat)%in%slide_info$slide$barcode
+        warning("Remove ", sum(unique_mat_bc), " barcodes from count matrix.")
+        count_mat = count_mat[,!unique_mat_bc]
+        
+        # filter out barcodes in slide info but not in count matrix
+        unique_slide_bc = !slide_info$slide$barcode%in%colnames(count_mat)
+        warning("Remove ", sum(unique_slide_bc), 
+                " barcodes from slide information.")
+        slide_info$slide = slide_info$slide[!unique_slide_bc,]
+        
+        if(ncol(count_mat)==0){
+            stop("No barcode in count matrix matches slide information.")
+        }
+        
     }
 
     # rearrange barcodes
