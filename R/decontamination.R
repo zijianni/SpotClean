@@ -288,7 +288,6 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     spot_distance <- abs(coef(lm_tmp)[2])
 
     # Keep highly expressed and highly variable genes
-    mean_exp <- rowSums(raw_data)/length(ts_idx)
     if(is.null(gene_keep)){
         gene_keep <- keepHighGene(raw_ts_data, verbose=verbose)
 
