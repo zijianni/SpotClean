@@ -12,7 +12,7 @@ mbrain_slide_info <- read10xSlide(
 
 
 test_that("Barcodes not matching", {
-    expect_error(createSlide(mbrain_raw[,1:10], mbrain_slide_info),
+    expect_warning(createSlide(mbrain_raw[,1:10], mbrain_slide_info),
                  "Barcodes in count matrix do not match")
 })
 
