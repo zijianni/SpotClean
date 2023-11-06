@@ -39,6 +39,8 @@ seurat_obj_f <- convertToSeurat(mbrain_obj,image_dir = spatial_dir,
 
 test_that("Filter background spots",{
     expect_equal(dim(seurat_obj_f), c(100, 2702))
-    expect_identical(colnames(seurat_obj_f),
-            mbrain_slide_info$slide$barcode[mbrain_slide_info$slide$tissue==1])
+    expect_identical(
+        colnames(seurat_obj_f),
+        sort(mbrain_slide_info$slide$barcode[mbrain_slide_info$slide$tissue==1])
+        )
 })

@@ -264,7 +264,7 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
 
     # Euclidean distance matrix for spots
     slide_distance <- .calculate_euclidean_weight(
-        select(slide, .data$imagerow, .data$imagecol)
+        select(slide, "imagerow", "imagecol")
     )
     rownames(slide_distance) <- colnames(slide_distance) <- slide$barcode
 
@@ -288,7 +288,6 @@ spotclean.SpatialExperiment <- function(slide_obj, gene_keep=NULL,
     spot_distance <- abs(coef(lm_tmp)[2])
 
     # Keep highly expressed and highly variable genes
-    mean_exp <- rowSums(raw_data)/length(ts_idx)
     if(is.null(gene_keep)){
         gene_keep <- keepHighGene(raw_ts_data, verbose=verbose)
 

@@ -16,8 +16,8 @@ mbrain_obj <- createSlide(mbrain_raw,
 # test output
 
 test_that("Decontamination",{
-    expect_silent(mbrain_decont_obj <- spotclean(mbrain_obj, candidate_radius=20,
-                                                 maxit = 3, verbose = FALSE))
+    expect_no_error(mbrain_decont_obj <- spotclean(
+        mbrain_obj, candidate_radius=20, maxit = 3, verbose = FALSE))
     expect_s4_class(mbrain_decont_obj,"SummarizedExperiment")
     expect_identical(names(mbrain_decont_obj@assays),"decont")
     expect_equal(metadata(mbrain_decont_obj)$ARC_score, 0.05160659)
