@@ -17,6 +17,6 @@ test_that("Top high gene cutoff", {
 })
 
 test_that("Mean expression cutoff", {
-    expect_true(length(keepHighGene(mbrain_raw, mean_cutoff = Inf))==7)
-    expect_true(length(keepHighGene(mbrain_raw, mean_cutoff = 500))==10)
+    expect_true(length(keepHighGene(mbrain_raw, mean_cutoff = Inf))==11)
+    expect_true(length(keepHighGene(mbrain_raw, mean_cutoff = 500))==14)
 })

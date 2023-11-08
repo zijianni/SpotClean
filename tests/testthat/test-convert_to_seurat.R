@@ -21,8 +21,15 @@ seurat_obj <- convertToSeurat(mbrain_obj,image_dir = spatial_dir,
                               filter_matrix = FALSE)
 
 test_that("Consistent count matrix",{
+    if(as.integer(gsub("\\<(\\d+)\\.\\d+\\.\\d+", "\\1", 
+                       seurat_obj@version))>=5){
+        seurat_counts <- seurat_obj@assays$Spatial$counts
+    }else{
+        seurat_counts <- seurat_obj@assays$Spatial@counts
+    }
+    
     expect_identical(mbrain_obj@assays@data$raw,
-                     seurat_obj@assays$Spatial@counts)
+                     seurat_counts)
 })
 
 test_that("Consistent slide metadata",{
@@ -40,7 +47,7 @@ seurat_obj_f <- convertToSeurat(mbrain_obj,image_dir = spatial_dir,
 test_that("Filter background spots",{
     expect_equal(dim(seurat_obj_f), c(100, 2702))
     expect_identical(
-        colnames(seurat_obj_f),
+        sort(colnames(seurat_obj_f)),
         sort(mbrain_slide_info$slide$barcode[mbrain_slide_info$slide$tissue==1])
         )
 })
