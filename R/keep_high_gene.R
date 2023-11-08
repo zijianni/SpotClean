@@ -40,7 +40,7 @@
 #'                              return_matrix=TRUE)
 #' dim(mbrain_raw_f)
 #'
-#' @importFrom Seurat CreateSeuratObject FindVariableFeatures
+#' @importFrom Seurat CreateSeuratObject NormalizeData FindVariableFeatures
 #' @importFrom Matrix rowMeans
 #'
 #'
@@ -59,12 +59,17 @@ keepHighGene <- function(count_mat, top_high=5000,
 
     high_exp_genes <- mean_exp>=mean_cutoff
 
-    S_vf <- CreateSeuratObject(log1p(count_mat))
+    S_vf <- NormalizeData(CreateSeuratObject(count_mat), verbose = FALSE)
     S_vf <- FindVariableFeatures(S_vf,
                                  selection.method = "mvp", verbose = FALSE)
-
-    high_variable_genes <- S_vf@assays$RNA@meta.features$mvp.variable
-
+    
+    # accommodate changes in Seurat v5 objects
+    if(as.integer(gsub("\\<(\\d+)\\.\\d+\\.\\d+", "\\1", S_vf@version))>=5){
+        high_variable_genes <- S_vf@assays$RNA@meta.data$vf_mvp_data_variable
+    }else{
+        high_variable_genes <- S_vf@assays$RNA@meta.features$mvp.variable
+    }
+    
     gene_tokeep <- high_variable_genes | high_exp_genes
 
     if(verbose){
