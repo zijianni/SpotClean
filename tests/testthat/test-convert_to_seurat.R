@@ -33,12 +33,14 @@ test_that("Consistent count matrix",{
 })
 
 test_that("Consistent slide metadata",{
-    expect_identical(factor(seurat_obj@images$slice1@coordinates$tissue),
-    mbrain_obj@metadata$slide$tissue)
-    expect_identical(rownames(seurat_obj@images$slice1@coordinates),
+    # Seurat VisiumV2 has dropped the `coordinates` slot so need to remove 
+    # some tests here
+    # expect_identical(factor(seurat_obj@images$slice1@coordinates$tissue),
+    # mbrain_obj@metadata$slide$tissue)
+    expect_identical(seurat_obj@images$slice1$centroids@cells,
                      mbrain_obj@metadata$slide$barcode)
-    expect_identical(seurat_obj@images$slice1@coordinates[,c("row","col")],
-                     mbrain_obj@metadata$slide[,c("row","col")])
+    # expect_identical(seurat_obj@images$slice1@coordinates[,c("row","col")],
+    #                  mbrain_obj@metadata$slide[,c("row","col")])
 })
 
 seurat_obj_f <- convertToSeurat(mbrain_obj,image_dir = spatial_dir,
