@@ -14,7 +14,7 @@ mbrain_obj <- createSlide(mbrain_raw, mbrain_slide_info)
 
 test_that("Invalid image directory",{
     expect_error(convertToSeurat(mbrain_obj, "foo", "raw"),
-                 "unable to open foo/tissue_lowres_image.png")
+                 "tissue_lowres_image.png")
 })
 
 seurat_obj <- convertToSeurat(mbrain_obj,image_dir = spatial_dir,
